@@ -51,7 +51,6 @@
 <body>
 
 <div id="banner-wrap">
-  <!-- CABECERA.png debe estar en la misma carpeta que index.html -->
   <img src="CABECERA.png" alt="El Juego de Jeromín: Lluvia de Lentejas">
 </div>
 <a id="canal-btn" href="https://youtube.com/@javiuve-truffautenpancorbo?si=A7UYQj9V6oG5OAQX" target="_blank" rel="noopener">📺 Visitar canal Javi UVE · Truffaut en PANCORBO</a>
@@ -226,11 +225,11 @@ const SW = () => Math.floor(W()*.013), SH = () => Math.floor(SW()*3);
 
 let state='waiting', score=0, lives=3, level=1;
 let btns={left:false,right:false,shoot:false}, shootPrev=false;
-let oliver={x:0,y:0,speed:0,invincible:0,mouthOpen:0};
+let oliver={x:0,y:0,speed:0,invincible:0,mouthOpen:0, animFrame:0, animTimer:0};
 let spoons=[], spoonCooldown=0, enemies=[], enemyTimer=0, enemyInterval=90, explosions=[], particles=[];
 
 function resetPositions() { oliver.x=W()/2-OW()/2; oliver.y=H()-OH()-Math.floor(H()*.02); oliver.speed=W()*.008; }
-function resetGame() { score=0;lives=3;level=1; resetPositions(); oliver.invincible=0;oliver.mouthOpen=0; spoons=[];enemies=[];explosions=[];particles=[]; enemyInterval=90;enemyTimer=0;spoonCooldown=0; updateLivesHUD(); }
+function resetGame() { score=0;lives=3;level=1; resetPositions(); oliver.invincible=0;oliver.mouthOpen=0; oliver.animFrame=0; oliver.animTimer=0; spoons=[];enemies=[];explosions=[];particles=[]; enemyInterval=90;enemyTimer=0;spoonCooldown=0; updateLivesHUD(); }
 
 function updateLivesHUD() {
   const ld = document.getElementById('lives-display'); ld.innerHTML = '';
@@ -257,8 +256,27 @@ function addExplosion(x,y,type) {
 function drawJeromin(x,y,inv) {
   if (inv>0 && Math.floor(inv/4)%2===0) return;
   const ow=OW(), oh=OH();
+  
   if (jeromínLoaded) {
-    ctx.drawImage(jeromínImg, x, y, ow, oh);
+    // Cálculo del ancho nativo de un único fotograma (dividiendo la imagen en 3 partes iguales)
+    const singleFrameWidth = jeromínImg.width / 3;
+    const singleFrameHeight = jeromínImg.height;
+    
+    // Selección de fotograma según estado clínico de Jeromín
+    let frameIndex = 0; 
+    if (oliver.mouthOpen > 0) {
+      frameIndex = 2; // Fotograma 3: Comiendo lenteja (Boca abierta)
+    } else if (btns.left || btns.right || keys['left'] || keys['right']) {
+      frameIndex = oliver.animFrame; // Fotograma 1 o 2 en bucle: Caminando
+    }
+
+    ctx.drawImage(
+      jeromínImg,
+      frameIndex * singleFrameWidth, 0, // Coordenadas de origen del trozo en el PNG
+      singleFrameWidth, singleFrameHeight, // Tamaño del recorte nativo
+      x, y,                              // Posición de destino en el canvas
+      ow, oh                             // Escala de destino adaptada al HUD
+    );
   } else {
     ctx.save();
     ctx.fillStyle='#a2b468'; ctx.fillRect(x+ow*.2,y+oh*.35,ow*.6,oh*.5);
@@ -381,6 +399,18 @@ function gameLoop(){
   if(state==='defenestration'||state==='gameover') return;
 
   drawBg();
+  
+  // Gestión de la animación interna del sprite (Bucle de frames 0 y 1 para andar)
+  if (goLeft || goRight) {
+    oliver.animTimer++;
+    if (oliver.animTimer >= 10) { // Velocidad de los pasos de Jeromín
+      oliver.animFrame = oliver.animFrame === 0 ? 1 : 0;
+      oliver.animTimer = 0;
+    }
+  } else {
+    oliver.animFrame = 0; // Si está quieto, fotograma base
+  }
+
   if(goLeft)  oliver.x=Math.max(0,oliver.x-oliver.speed);
   if(goRight) oliver.x=Math.min(W()-OW(),oliver.x+oliver.speed);
   if(shoot&&spoonCooldown<=0){spoons.push({x:oliver.x+OW()/2-SW()/2,y:oliver.y-SH()});spoonCooldown=18;}

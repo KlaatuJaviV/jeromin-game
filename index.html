@@ -105,7 +105,7 @@ jeromínAndandoImg.onload  = () => { andandoLoaded = true; };
 jeromínComiendoImg.onload = () => { comiendoLoaded = true; };
 headImg.onload            = () => { headLoaded = true; updateLivesHUD(); };
 
-// Tus 3 archivos PNG independientes subidos a GitHub
+// Tus archivos PNG independientes
 jeromínQuietoImg.src   = 'JEROMIN-quieto.png';
 jeromínAndandoImg.src  = 'JEROMIN-andando.png';
 jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
@@ -162,7 +162,7 @@ function playWilhelm() {
   ns.connect(hpf); hpf.connect(actx.destination); ns.start(now); ns.stop(now+.55);
 }
 
-// ── Storage (localStorage para GitHub Pages) ───────────────────────────────
+// ── Storage (localStorage para rankings) ───────────────────────────────────
 let rankings = [];
 function loadRankings() {
   try { const r = localStorage.getItem('jeromin-rankings'); if (r) rankings = JSON.parse(r); } catch(e) { rankings = []; }
@@ -262,26 +262,19 @@ function addExplosion(x,y,type) {
 function drawJeromin(x,y,inv) {
   if (inv>0 && Math.floor(inv/4)%2===0) return;
   const ow=OW(), oh=OH();
+  const goLeft = btns.left || keys['left'];
+  const goRight = btns.right || keys['right'];
   
-  // Comprobamos que las tres imágenes estén listas en el navegador
   if (quietoLoaded && andandoLoaded && comiendoLoaded) {
-    let imgA_Dibujar = jeromínQuietoImg; // Por defecto, quieto
+    let imgA_Dibujar = jeromínQuietoImg;
 
     if (oliver.mouthOpen > 0) {
-      imgA_Dibujar = jeromínComiendoImg; // Si tiene la boca abierta, el PNG de comer
-    } else if (btns.left || btns.right || keys['left'] || keys['right']) {
-      // Si se está moviendo, usamos la animación de caminata.
-      // Como ahora oliver.animFrame alterna entre 0 y 1 en el gameLoop:
-      // - Si es 0: dejamos la de quieto (o un paso 1)
-      // - Si es 1: ponemos la de andando (o un paso 2)
+      imgA_Dibujar = jeromínComiendoImg;
+    } else if (goLeft || goRight) {
       imgA_Dibujar = oliver.animFrame === 1 ? jeromínAndandoImg : jeromínQuietoImg;
     }
-
-    // Dibujamos la imagen elegida de forma directa (sin recortes complejos)
     ctx.drawImage(imgA_Dibujar, x, y, ow, oh);
-
   } else {
-    // Plan B en vectores por si la red va lenta
     ctx.save();
     ctx.fillStyle='#a2b468'; ctx.fillRect(x+ow*.2,y+oh*.35,ow*.6,oh*.5);
     ctx.fillStyle='#f5c99e'; ctx.beginPath(); ctx.ellipse(x+ow/2,y+oh*.18,ow*.22,oh*.16,0,0,Math.PI*2); ctx.fill();
@@ -335,8 +328,8 @@ function drawBg() {
   ctx.fillStyle='#f7f4ee'; ctx.fillRect(0,0,W(),H());
   ctx.strokeStyle='rgba(162,180,104,0.13)'; ctx.lineWidth=1;
   const step=Math.floor(W()/10);
-  for (let x=0;x<W();x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H());ctx.stroke();}
-  for (let y=0;y<H();y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W(),y);ctx.stroke();}
+  for (let x=0; x < W(); x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H());ctx.stroke();}
+  for (let y=0; y < H(); y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W(),y);ctx.stroke();}
   ctx.fillStyle='rgba(131,57,136,0.07)'; ctx.fillRect(0,H()-Math.floor(H()*.025),W(),Math.floor(H()*.025));
 }
 
@@ -404,15 +397,14 @@ function gameLoop(){
 
   drawBg();
   
-  // Gestión de la animación interna del sprite (Bucle de frames 0 y 1 para andar)
   if (goLeft || goRight) {
     oliver.animTimer++;
-    if (oliver.animTimer >= 10) { // Velocidad de los pasos de Jeromín
+    if (oliver.animTimer >= 10) {
       oliver.animFrame = oliver.animFrame === 0 ? 1 : 0;
       oliver.animTimer = 0;
     }
   } else {
-    oliver.animFrame = 0; // Si está quieto, fotograma base
+    oliver.animFrame = 0;
   }
 
   if(goLeft)  oliver.x=Math.max(0,oliver.x-oliver.speed);

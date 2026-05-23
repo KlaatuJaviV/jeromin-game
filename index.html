@@ -92,19 +92,25 @@
 </div>
 
 <script>
-// ── Images (rutas locales — deben estar en la misma carpeta que index.html) ─
-const jeromínImg = new Image();
-const headImg    = new Image();
-let jeromínLoaded = false, headLoaded = false;
+// ── Images (Rutas locales independientes) ──────────────────────────────────
+const jeromínQuietoImg   = new Image();
+const jeromínAndandoImg  = new Image();
+const jeromínComiendoImg = new Image();
+const headImg            = new Image();
 
-jeromínImg.onload = () => { jeromínLoaded = true; };
-headImg.onload    = () => { headLoaded = true; updateLivesHUD(); };
+let quietoLoaded = false, andandoLoaded = false, comiendoLoaded = false, headLoaded = false;
 
-// JEROMIN-personaje.png = sprite completo de Jeromín
-jeromínImg.src = 'JEROMIN-personaje.png';
-// CABECITA.png = cabeza para indicador de vidas
-headImg.src    = 'CABECITA.png';
+jeromínQuietoImg.onload   = () => { quietoLoaded = true; };
+jeromínAndandoImg.onload  = () => { andandoLoaded = true; };
+jeromínComiendoImg.onload = () => { comiendoLoaded = true; };
+headImg.onload            = () => { headLoaded = true; updateLivesHUD(); };
 
+// Tus 3 archivos PNG independientes subidos a GitHub
+jeromínQuietoImg.src   = 'JEROMIN-quieto.png';
+jeromínAndandoImg.src  = 'JEROMIN-andando.png';
+jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
+headImg.src            = 'CABECITA.png';
+ 
 // ── Audio ──────────────────────────────────────────────────────────────────
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let actx = null;
@@ -257,27 +263,25 @@ function drawJeromin(x,y,inv) {
   if (inv>0 && Math.floor(inv/4)%2===0) return;
   const ow=OW(), oh=OH();
   
-  if (jeromínLoaded) {
-    // Cálculo del ancho nativo de un único fotograma (dividiendo la imagen en 3 partes iguales)
-    const singleFrameWidth = jeromínImg.width / 3;
-    const singleFrameHeight = jeromínImg.height;
-    
-    // Selección de fotograma según estado clínico de Jeromín
-    let frameIndex = 0; 
+  // Comprobamos que las tres imágenes estén listas en el navegador
+  if (quietoLoaded && andandoLoaded && comiendoLoaded) {
+    let imgA_Dibujar = jeromínQuietoImg; // Por defecto, quieto
+
     if (oliver.mouthOpen > 0) {
-      frameIndex = 2; // Fotograma 3: Comiendo lenteja (Boca abierta)
+      imgA_Dibujar = jeromínComiendoImg; // Si tiene la boca abierta, el PNG de comer
     } else if (btns.left || btns.right || keys['left'] || keys['right']) {
-      frameIndex = oliver.animFrame; // Fotograma 1 o 2 en bucle: Caminando
+      // Si se está moviendo, usamos la animación de caminata.
+      // Como ahora oliver.animFrame alterna entre 0 y 1 en el gameLoop:
+      // - Si es 0: dejamos la de quieto (o un paso 1)
+      // - Si es 1: ponemos la de andando (o un paso 2)
+      imgA_Dibujar = oliver.animFrame === 1 ? jeromínAndandoImg : jeromínQuietoImg;
     }
 
-    ctx.drawImage(
-      jeromínImg,
-      frameIndex * singleFrameWidth, 0, // Coordenadas de origen del trozo en el PNG
-      singleFrameWidth, singleFrameHeight, // Tamaño del recorte nativo
-      x, y,                              // Posición de destino en el canvas
-      ow, oh                             // Escala de destino adaptada al HUD
-    );
+    // Dibujamos la imagen elegida de forma directa (sin recortes complejos)
+    ctx.drawImage(imgA_Dibujar, x, y, ow, oh);
+
   } else {
+    // Plan B en vectores por si la red va lenta
     ctx.save();
     ctx.fillStyle='#a2b468'; ctx.fillRect(x+ow*.2,y+oh*.35,ow*.6,oh*.5);
     ctx.fillStyle='#f5c99e'; ctx.beginPath(); ctx.ellipse(x+ow/2,y+oh*.18,ow*.22,oh*.16,0,0,Math.PI*2); ctx.fill();

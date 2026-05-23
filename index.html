@@ -92,7 +92,6 @@
 </div>
 
 <script>
-// ── Images (Rutas locales independientes) ──────────────────────────────────
 const jeromínQuietoImg   = new Image();
 const jeromínAndandoImg  = new Image();
 const jeromínComiendoImg = new Image();
@@ -105,13 +104,11 @@ jeromínAndandoImg.onload  = () => { andandoLoaded = true; };
 jeromínComiendoImg.onload = () => { comiendoLoaded = true; };
 headImg.onload            = () => { headLoaded = true; updateLivesHUD(); };
 
-// Tus archivos PNG independientes
 jeromínQuietoImg.src   = 'JEROMIN-quieto.png';
 jeromínAndandoImg.src  = 'JEROMIN-andando.png';
 jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
 headImg.src            = 'CABECITA.png';
  
-// ── Audio ──────────────────────────────────────────────────────────────────
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let actx = null;
 function ensureAudio() { if (!actx) actx = new AudioCtx(); }
@@ -162,7 +159,6 @@ function playWilhelm() {
   ns.connect(hpf); hpf.connect(actx.destination); ns.start(now); ns.stop(now+.55);
 }
 
-// ── Storage (localStorage para rankings) ───────────────────────────────────
 let rankings = [];
 function loadRankings() {
   try { const r = localStorage.getItem('jeromin-rankings'); if (r) rankings = JSON.parse(r); } catch(e) { rankings = []; }
@@ -177,7 +173,6 @@ function renderRanking() {
   s.forEach((e,i) => { const li=document.createElement('li'); li.innerHTML=`<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; rl.appendChild(li); });
 }
 
-// ── Panels ─────────────────────────────────────────────────────────────────
 const goPanel      = document.getElementById('gameover-panel');
 const defPanel     = document.getElementById('defenestration-panel');
 const instrPanel   = document.getElementById('instructions-panel');
@@ -209,7 +204,6 @@ function showGameOver() {
   renderRanking(); goPanel.classList.add('visible');
 }
 
-// ── Canvas ─────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
 
@@ -264,7 +258,7 @@ function drawJeromin(x,y,inv) {
   const ow=OW(), oh=OH();
   const goLeft = btns.left || keys['left'];
   const goRight = btns.right || keys['right'];
-  
+   
   if (quietoLoaded && andandoLoaded && comiendoLoaded) {
     let imgA_Dibujar = jeromínQuietoImg;
 
@@ -396,7 +390,7 @@ function gameLoop(){
   if(state==='defenestration'||state==='gameover') return;
 
   drawBg();
-  
+   
   if (goLeft || goRight) {
     oliver.animTimer++;
     if (oliver.animTimer >= 10) {
@@ -423,6 +417,9 @@ function gameLoop(){
       if(e.type!=='saco') return;
       if(!toRemove.has(ei)&&overlaps(s.x,s.y,SW(),SH(),e.x,e.y,EW(),EH())){
         addExplosion(e.x+EW()/2,e.y+EH()/2,'saco'); playBagExplode(); toRemove.add(ei); s.dead=true;
+        score+=2;
+        const nl=Math.floor(score/80)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
+        updateLivesHUD();
       }
     });
   });
@@ -439,8 +436,8 @@ function gameLoop(){
           if(lives<=0){state='gameover';showGameOver();}else{state='defenestration';showDefenestration();}
         }
       } else {
-        addExplosion(e.x+EW()/2,e.y+EH()/2,'lenteja'); score+=10; oliver.mouthOpen=20; playBite();
-        const nl=Math.floor(score/100)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
+        addExplosion(e.x+EW()/2,e.y+EH()/2,'lenteja'); score+=8; oliver.mouthOpen=20; playBite();
+        const nl=Math.floor(score/80)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
         updateLivesHUD();
       }
     }

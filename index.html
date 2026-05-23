@@ -327,6 +327,17 @@ function drawBg() {
   ctx.fillStyle='rgba(131,57,136,0.07)'; ctx.fillRect(0,H()-Math.floor(H()*.025),W(),Math.floor(H()*.025));
 }
 
+function drawInGameScore() {
+  ctx.save();
+  ctx.font = 'bold ' + Math.floor(W() * 0.045) + 'px Courier New';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#833988';
+  ctx.shadowColor = 'rgba(247, 244, 238, 0.9)';
+  ctx.shadowBlur = 4;
+  ctx.fillText(score + ' pts', Math.floor(W() * 0.03), Math.floor(H() * 0.05));
+  ctx.restore();
+}
+
 function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
 
 function drawStartScreen() {
@@ -417,8 +428,8 @@ function gameLoop(){
       if(e.type!=='saco') return;
       if(!toRemove.has(ei)&&overlaps(s.x,s.y,SW(),SH(),e.x,e.y,EW(),EH())){
         addExplosion(e.x+EW()/2,e.y+EH()/2,'saco'); playBagExplode(); toRemove.add(ei); s.dead=true;
-        score+=2;
-        const nl=Math.floor(score/80)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
+        score+=10;
+        const nl=Math.floor(score/1000)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
         updateLivesHUD();
       }
     });
@@ -436,8 +447,8 @@ function gameLoop(){
           if(lives<=0){state='gameover';showGameOver();}else{state='defenestration';showDefenestration();}
         }
       } else {
-        addExplosion(e.x+EW()/2,e.y+EH()/2,'lenteja'); score+=8; oliver.mouthOpen=20; playBite();
-        const nl=Math.floor(score/80)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
+        addExplosion(e.x+EW()/2,e.y+EH()/2,'lenteja'); score+=100; oliver.mouthOpen=20; playBite();
+        const nl=Math.floor(score/1000)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
         updateLivesHUD();
       }
     }
@@ -452,6 +463,8 @@ function gameLoop(){
   spoons.forEach(s=>drawSpoon(s.x,s.y));
   explosions.forEach(e=>drawExplosion(e));
   drawJeromin(oliver.x,oliver.y,oliver.invincible);
+  
+  drawInGameScore();
 }
 
 loadRankings(); renderRanking(); updateLivesHUD();

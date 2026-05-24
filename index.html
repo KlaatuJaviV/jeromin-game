@@ -20,7 +20,6 @@
   
   #controls { display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 16px; gap:10px; margin-top:6px; }
   
-  /* NUEVO: Contenedor para agrupar y juntar las flechas */
   .dir-group { display:flex; gap:6px; }
   
   .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:2em; width:86px; height:86px; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
@@ -41,7 +40,7 @@
   #ranking h3 { color:#833988; font-size:.95em; margin-bottom:6px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:4px; }
   #ranking-list { list-style:none; width:100%; }
   #ranking-list li { display:flex; justify-content:space-between; font-size:.85em; padding:3px 0; border-bottom:1px solid #a2b46844; color:#111; }
-  #ranking-list li:first-child { color:#833988; font-weight:bold; }
+  #ranking-list li:first-child { color:#833888; font-weight:bold; }
   #ranking-list li .pos { color:#a2b468; width:20px; font-weight:bold; }
   #ranking-list li .name { flex:1; padding-left:6px; }
   #ranking-list li .pts { color:#833988; font-weight:bold; }
@@ -71,7 +70,7 @@
     <h2>📜 Cómo jugar</h2>
     <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
     Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
-    Mucha suerte and... ¡ayúdale a desatar todo el poder de las legumbres!</p>
+    Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
     <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
   </div>
   <div class="overlay-panel" id="defenestration-panel">
@@ -232,10 +231,11 @@ const SW = () => Math.floor(W()*.013), SH = () => Math.floor(SW()*3);
 
 let state='waiting', score=0, lives=3, level=1;
 let btns={left:false,right:false,shoot:false}, shootPrev=false;
-let oliver={x:0,y:0,speed:0,invincible:0,mouthOpen:0, animFrame:0, animTimer:0};
+// MODIFICADO: Añadido "facing" en oliver para controlar la orientación ('left' por defecto)
+let oliver={x:0,y:0,speed:0,invincible:0,mouthOpen:0, animFrame:0, animTimer:0, facing:'left'};
 let spoons=[], spoonCooldown=0, enemies=[], enemyTimer=0, enemyInterval=90, explosions=[], particles=[];
 
-function resetPositions() { oliver.x=W()/2-OW()/2; oliver.y=H()-OH()-Math.floor(H()*.02); oliver.speed=W()*.008; }
+function resetPositions() { oliver.x=W()/2-OW()/2; oliver.y=H()-OH()-Math.floor(H()*.02); oliver.speed=W()*.008; oliver.facing='left'; }
 function resetGame() { score=0;lives=3;level=1; resetPositions(); oliver.invincible=0;oliver.mouthOpen=0; oliver.animFrame=0; oliver.animTimer=0; spoons=[];enemies=[];explosions=[];particles=[]; enemyInterval=90;enemyTimer=0;spoonCooldown=0; updateLivesHUD(); }
 
 function updateLivesHUD() {
@@ -260,6 +260,7 @@ function addExplosion(x,y,type) {
   for (let i=0;i<12;i++) particles.push({x,y, vx:(Math.random()-.5)*W()*.012, vy:(Math.random()-.5)*W()*.012, life:30+Math.random()*20, color:type==='lenteja'?'#a2b468':'#833988', r:W()*.005+Math.random()*W()*.006});
 }
 
+// MODIFICADO: La función drawJeromin ahora invierte la imagen en el eje X si oliver.facing === 'right'
 function drawJeromin(x,y,inv) {
   if (inv>0 && Math.floor(inv/4)%2===0) return;
   const ow=OW(), oh=OH();
@@ -274,7 +275,18 @@ function drawJeromin(x,y,inv) {
     } else if (goLeft || goRight) {
       imgA_Dibujar = oliver.animFrame === 1 ? jeromínAndandoImg : jeromínQuietoImg;
     }
-    ctx.drawImage(imgA_Dibujar, x, y, ow, oh);
+    
+    ctx.save();
+    // Si mira a la derecha, trasladamos el origen al centro horizontal del sprite y escalamos negativamente en X
+    if (oliver.facing === 'right') {
+      ctx.translate(x + ow / 2, y + oh / 2);
+      ctx.scale(-1, 1);
+      ctx.drawImage(imgA_Dibujar, -ow / 2, -oh / 2, ow, oh);
+    } else {
+      ctx.drawImage(imgA_Dibujar, x, y, ow, oh);
+    }
+    ctx.restore();
+
   } else {
     ctx.save();
     ctx.fillStyle='#a2b468'; ctx.fillRect(x+ow*.2,y+oh*.35,ow*.6,oh*.5);
@@ -415,6 +427,9 @@ function gameLoop(){
       oliver.animFrame = oliver.animFrame === 0 ? 1 : 0;
       oliver.animTimer = 0;
     }
+    // MODIFICADO: Actualizar la dirección en la que está mirando Jeromín
+    if (goLeft) oliver.facing = 'left';
+    if (goRight) oliver.facing = 'right';
   } else {
     oliver.animFrame = 0;
   }

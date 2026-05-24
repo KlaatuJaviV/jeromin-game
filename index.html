@@ -6,31 +6,36 @@
 <title>El Juego de Jeromín: Lluvia de Lentejas</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { background:#f0ede6; display:flex; flex-direction:column; align-items:center; height:100vh; height:100dvh; overflow:hidden; font-family:'Courier New',monospace; color:#111; touch-action:none; padding:8px; }
+  body { background:#f0ede6; display:flex; flex-direction:column; align-items:center; min-height:100vh; min-height:100dvh; overflow:hidden; font-family:'Courier New',monospace; color:#111; touch-action:none; padding:10px; }
   
-  #banner-wrap { width:100%; max-width:480px; height:10vh; min-height:50px; max-height:80px; margin-bottom:4px; flex-shrink:0; }
-  #banner-wrap img { width:100%; height:100%; object-fit:contain; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(131,57,136,0.18); }
+  /* Cabecera fluida pero con presencia */
+  #banner-wrap { width:100%; max-width:460px; margin-bottom:6px; flex-shrink:0; }
+  #banner-wrap img { width:100%; height:auto; max-height:75px; object-fit:contain; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(131,57,136,0.18); }
   
-  #canal-btn { display:block; text-align:center; background:#833988; color:#fff; font-family:'Courier New',monospace; font-size:12px; font-weight:bold; text-decoration:none; padding:6px 12px; border-radius:20px; margin-bottom:4px; letter-spacing:.02em; box-shadow:0 2px 6px rgba(131,57,136,0.3); width:100%; max-width:480px; flex-shrink:0; }
+  #canal-btn { display:block; text-align:center; background:#833988; color:#fff; font-family:'Courier New',monospace; font-size:12px; font-weight:bold; text-decoration:none; padding:6px 12px; border-radius:20px; margin-bottom:10px; letter-spacing:.02em; box-shadow:0 2px 6px rgba(131,57,136,0.3); width:100%; max-width:460px; flex-shrink:0; }
   #canal-btn:active { background:#5a2060; }
   
-  #hud { display:flex; gap:12px; margin-bottom:6px; font-size:14px; align-items:center; flex-shrink:0; height:24px; }
+  /* Contenedor central para agrupar HUD, Juego y Botones sin fisuras */
+  #main-container { width:100%; max-width:440px; display:flex; flex-direction:column; align-items:center; flex-grow:1; justify-content:center; gap:6px; }
+
+  #hud { display:flex; gap:12px; font-size:14px; align-items:center; flex-shrink:0; height:24px; width:100%; justify-content:center; }
   #lives-display { display:flex; gap:3px; align-items:center; min-height:24px; }
   #lives-display img { width:22px; height:22px; object-fit:contain; }
   #score-span { color:#833988; font-weight:bold; }
   #level-span { color:#a2b468; font-weight:bold; }
   
-  #game-wrap { position:relative; width:100%; max-width:440px; height:52vh; display:flex; justify-content:center; align-items:center; flex-shrink:0; }
-  canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); width:100%; height:100%; object-fit:contain; }
+  /* El lienzo ahora aprovecha el ancho máximo y crece orgánicamente */
+  #game-wrap { position:relative; width:100%; display:flex; justify-content:center; align-items:center; flex-grow:1; max-height:50vh; }
+  canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); width:100%; height:100%; max-height:100%; aspect-ratio: 1 / 1.15; object-fit:contain; }
   
-  /* CONTROLES ERGONÓMICOS REORGANIZADOS: Disparar a la izquierda, movimiento a la derecha */
-  #controls { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:440px; height:16vh; min-height:80px; padding:4px; gap:10px; flex-shrink:0; margin-top:auto; }
+  /* Controles ergonómicos pegados inmediatamente debajo de la caja de juego */
+  #controls { display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 4px 0 4px; gap:12px; flex-shrink:0; }
   .dir-group { display:flex; gap:14px; }
   
-  .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:28px; width:68px; height:68px; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; touch-action:none; }
+  .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:28px; width:66px; height:66px; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; touch-action:none; }
   .btn:active { background:rgba(162,180,104,0.55); }
   
-  #btn-shoot { width:78px; height:78px; font-size:32px; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; touch-action:none; }
+  #btn-shoot { width:76px; height:76px; font-size:32px; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; touch-action:none; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
   
   .overlay-panel { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px; overflow-y:auto; z-index:10; }
@@ -72,42 +77,45 @@
   <img src="CABECERA.png" alt="El Juego de Jeromín: Lluvia de Lentejas" onerror="this.style.display='none'">
 </div>
 <a id="canal-btn" href="https://youtube.com/@javiuve-truffautenpancorbo?si=A7UYQj9V6oG5OAQX" target="_blank" rel="noopener">📺 Visitar canal Javi UVE · Truffaut en PANCORBO</a>
-<div id="hud">
-  <div id="lives-display"></div>
-  <span id="score-span">Puntos: 0</span>
-  <span id="level-span">Nivel: 1</span>
-</div>
 
-<div id="game-wrap">
-  <canvas id="c"></canvas>
-  <div class="overlay-panel" id="instructions-panel">
-    <h2>📜 Cómo jugar</h2>
-    <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
-    Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
-    ¡Ayúdale a desatar todo el poder de las legumbres!</p>
-    <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
+<div id="main-container">
+  <div id="hud">
+    <div id="lives-display"></div>
+    <span id="score-span">Puntos: 0</span>
+    <span id="level-span">Nivel: 1</span>
   </div>
-  <div class="overlay-panel" id="defenestration-panel">
-    <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
-    <div class="lives-left" id="lives-left-msg"></div>
-    <button class="action-btn btn-green" id="continue-btn">😤 Continuar</button>
-  </div>
-  <div class="overlay-panel" id="gameover-panel">
-    <h2>💀 ¡Jeromín ha muerto<br>de indigestión! 💀</h2>
-    <div class="score-final" id="score-final">Puntuación: 0</div>
-    <input id="name-input" type="text" maxlength="16" placeholder="Tu nombre aquí" autocomplete="off"/>
-    <div id="saved-msg"></div>
-    <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
-    <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
-    <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
-  </div>
-</div>
 
-<div id="controls">
-  <button class="btn" id="btn-shoot" aria-label="¡Dispara cucharas!">🥄</button>
-  <div class="dir-group">
-    <button class="btn" id="btn-left" aria-label="Muévete p´allá">◀</button>
-    <button class="btn" id="btn-right" aria-label="Muévete p´acá">▶</button>
+  <div id="game-wrap">
+    <canvas id="c"></canvas>
+    <div class="overlay-panel" id="instructions-panel">
+      <h2>📜 Cómo jugar</h2>
+      <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
+      Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
+      ¡Ayúdale a desatar todo el poder de las legumbres!</p>
+      <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
+    </div>
+    <div class="overlay-panel" id="defenestration-panel">
+      <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
+      <div class="lives-left" id="lives-left-msg"></div>
+      <button class="action-btn btn-green" id="continue-btn">😤 Continuar</button>
+    </div>
+    <div class="overlay-panel" id="gameover-panel">
+      <h2>💀 ¡Jeromín ha muerto<br>de indigestión! 💀</h2>
+      <div class="score-final" id="score-final">Puntuación: 0</div>
+      <input id="name-input" type="text" maxlength="16" placeholder="Tu nombre aquí" autocomplete="off"/>
+      <div id="saved-msg"></div>
+      <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
+      <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
+      <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
+    </div>
+  </div>
+
+  <div id="controls">
+    <button class="btn" id="btn-shoot" aria-label="¡Dispara cucharas!">🥄</button>
+    <div class="dir-group">
+      <button class="btn" id="btn-left" aria-label="Muévete p´allá">◀</button>
+      <button class="btn" id="btn-right" aria-label="Muévete p´acá">▶</button>
+    </div>
   </div>
 </div>
 
@@ -356,7 +364,7 @@ function drawStartScreen() {
   ctx.font='bold '+Math.floor(W()*.032)+'px Courier New'; ctx.fillStyle='#fff';
   ctx.fillText('📜 Instrucciones para jugar',W()/2,by+bh*.62);
   ctx.font=Math.floor(W()*.028)+'px Courier New'; ctx.fillStyle='#555';
-  ctx.fillText('Toca 🥄 o pulsa ENTER para comenzar',W()/2,H()*.62);
+  ctx.fillText('Toca 🥄 o pulsa ENTER para comenzar',W./2,H()*.62);
   canvas._instrBtn={x:bx,y:by,w:bw,h:bh};
   ctx.restore();
 }
@@ -489,7 +497,7 @@ function gameLoop(){
 
 loadRankings(); renderRanking(); updateLivesHUD();
 resize();
-setTimeout(resize, 150);
+setTimeout(resize, 100);
 gameLoop();
 </script>
 </body>

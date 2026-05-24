@@ -8,7 +8,6 @@
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { background:#f0ede6; display:flex; flex-direction:column; align-items:center; justify-content:space-between; min-height:100dvh; min-height:100vh; overflow:hidden; font-family:'Courier New',monospace; color:#111; touch-action:none; padding:4px; }
   
-  /* Ajustes elásticos para la cabecera en móviles pequeños */
   #banner-wrap { width:100%; max-width:520px; margin-bottom:2px; flex-shrink:1; }
   #banner-wrap img { width:100%; max-height:12vh; object-fit:contain; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(131,57,136,0.18); }
   
@@ -24,9 +23,9 @@
   #game-wrap { position:relative; width:100%; max-width:520px; display:flex; justify-content:center; align-items:center; flex-grow:1; min-height:0; }
   canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); max-width:100%; max-height:100%; object-fit:contain; }
   
-  /* Controles ergonómicos: Disparar a la izq, Movimiento agrupado a la dcha */
+  /* Controles: Disparar a la izquierda, movimiento a la derecha */
   #controls { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:520px; padding:6px 8px; gap:8px; flex-shrink:0; }
-  .dir-group { display:flex; gap:10px; } /* Agrupa los botones de dirección */
+  .dir-group { display:flex; gap:10px; }
   
   .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:1.8em; width:17vw; height:17vw; max-width:74px; max-height:74px; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
   .btn:active { background:rgba(162,180,104,0.55); }
@@ -34,170 +33,5 @@
   #btn-shoot { width:21vw; height:21vw; max-width:86px; max-height:86px; font-size:1.6em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
   
-  /* Paneles adaptables para que no oculten los botones ni se salgan del Canvas */
   .overlay-panel { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px; overflow-y:auto; z-index:10; }
-  .overlay-panel.visible { display:flex; }
-  
-  #instructions-panel h2 { color:#833988; font-size:calc(0.9em + 0.5vw); text-align:center; margin-bottom:2px; }
-  #instructions-panel p { color:#111; font-size:calc(0.7em + 0.3vw); line-height:1.5; max-width:100%; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:10px; background:rgba(162,180,104,0.1); }
-  
-  #defenestration-panel h2 { color:#833988; font-size:calc(0.9em + 0.5vw); text-align:center; line-height:1.4; }
-  #defenestration-panel .lives-left { color:#a2b468; font-size:0.9em; font-weight:bold; }
-  
-  #gameover-panel h2 { color:#833988; font-size:calc(1em + 0.4vw); text-align:center; }
-  #gameover-panel .score-final { color:#a2b468; font-size:1em; font-weight:bold; }
-  
-  #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:0.9em; padding:6px 10px; border-radius:4px; text-align:center; width:80%; max-width:200px; outline:none; }
-  #name-input::placeholder { color:#aaa; }
-  
-  #ranking { width:100%; max-width:260px; margin: 2px 0; }
-  #ranking h3 { color:#833988; font-size:.85em; margin-bottom:4px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:2px; }
-  #ranking-list { list-style:none; width:100%; }
-  #ranking-list li { display:flex; justify-content:space-between; font-size:.75em; padding:2px 0; border-bottom:1px solid #a2b46844; color:#111; }
-  #ranking-list li:first-child { color:#833988; font-weight:bold; }
-  #ranking-list li .pos { color:#a2b468; width:18px; font-weight:bold; }
-  #ranking-list li .name { flex:1; padding-left:4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #ranking-list li .pts { color:#833988; font-weight:bold; }
-  
-  #saved-msg { color:#a2b468; font-size:.8em; min-height:1em; font-weight:bold; }
-  
-  .action-btn { font-family:'Courier New',monospace; font-size:0.9em; cursor:pointer; padding:8px 20px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; flex-shrink:0; }
-  .btn-purple { background:#833988; color:#fff; }
-  .btn-purple:active { background:#5a2060; }
-  .btn-green { background:#a2b468; color:#fff; }
-  .btn-green:active { background:#728040; }
-</style>
-</head>
-<body>
-
-<div id="banner-wrap">
-  <img src="CABECERA-mini.png" alt="El Juego de Jeromín: Lluvia de Lentejas">
-</div>
-<a id="canal-btn" href="https://youtube.com/@javiuve-truffautenpancorbo?si=A7UYQj9V6oG5OAQX" target="_blank" rel="noopener">📺 Visitar canal Javi UVE · Truffaut en PANCORBO</a>
-<div id="hud">
-  <div id="lives-display"></div>
-  <span id="score-span">Puntos: 0</span>
-  <span id="level-span">Nivel: 1</span>
-</div>
-
-<div id="game-wrap">
-  <canvas id="c"></canvas>
-  <div class="overlay-panel" id="instructions-panel">
-    <h2>📜 Cómo jugar</h2>
-    <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
-    Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
-    ¡Ayúdale a desatar todo el poder de las legumbres!</p>
-    <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
-  </div>
-  <div class="overlay-panel" id="defenestration-panel">
-    <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
-    <div class="lives-left" id="lives-left-msg"></div>
-    <button class="action-btn btn-green" id="continue-btn">😤 Continuar</button>
-  </div>
-  <div class="overlay-panel" id="gameover-panel">
-    <h2>💀 ¡Jeromín ha muerto<br>de indigestión! 💀</h2>
-    <div class="score-final" id="score-final">Puntuación: 0</div>
-    <input id="name-input" type="text" maxlength="16" placeholder="Tu nombre aquí" autocomplete="off"/>
-    <div id="saved-msg"></div>
-    <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
-    <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
-    <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
-  </div>
-</div>
-
-<div id="controls">
-  <button class="btn" id="btn-shoot" aria-label="¡Dispara cucharas!">🥄</button>
-  <div class="dir-group">
-    <button class="btn" id="btn-left" aria-label="Muévete p´allá">◀</button>
-    <button class="btn" id="btn-right" aria-label="Muévete p´acá">▶</button>
-  </div>
-</div>
-
-<script>
-const jeromínQuietoImg   = new Image();
-const jeromínAndandoImg  = new Image();
-const jeromínComiendoImg = new Image();
-const headImg            = new Image();
-
-let quietoLoaded = false, andandoLoaded = false, comiendoLoaded = false, headLoaded = false;
-
-jeromínQuietoImg.onload   = () => { quietoLoaded = true; };
-jeromínAndandoImg.onload  = () => { andandoLoaded = true; };
-jeromínComiendoImg.onload = () => { comiendoLoaded = true; };
-headImg.onload            = () => { headLoaded = true; updateLivesHUD(); };
-
-jeromínQuietoImg.src   = 'JEROMIN-quieto.png';
-jeromínAndandoImg.src  = 'JEROMIN-andando.png';
-jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
-headImg.src            = 'CABECITA.png';
- 
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let actx = null;
-function ensureAudio() { if (!actx) actx = new AudioCtx(); }
-
-function playBite() {
-  ensureAudio(); const now = actx.currentTime;
-  const bL = actx.sampleRate*.12, buf = actx.createBuffer(1,bL,actx.sampleRate), d = buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/bL,2);
-  const src = actx.createBufferSource(); src.buffer = buf;
-  const bpf = actx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=1800; bpf.Q.value=0.8;
-  const g = actx.createGain(); g.gain.setValueAtTime(1.2,now); g.gain.exponentialRampToValueAtTime(.001,now+.13);
-  src.connect(bpf); bpf.connect(g); g.connect(actx.destination); src.start(now); src.stop(now+.14);
-  const osc = actx.createOscillator(), g2 = actx.createGain();
-  osc.frequency.setValueAtTime(180,now); osc.frequency.exponentialRampToValueAtTime(60,now+.08);
-  g2.gain.setValueAtTime(.6,now); g2.gain.exponentialRampToValueAtTime(.001,now+.1);
-  osc.connect(g2); g2.connect(actx.destination); osc.start(now); osc.stop(now+.1);
-}
-
-function playBagExplode() {
-  ensureAudio(); const now = actx.currentTime;
-  const osc = actx.createOscillator(), g = actx.createGain();
-  osc.type='sine'; osc.frequency.setValueAtTime(120,now); osc.frequency.exponentialRampToValueAtTime(30,now+.25);
-  g.gain.setValueAtTime(1.0,now); g.gain.exponentialRampToValueAtTime(0.001,now+.28);
-  osc.connect(g); g.connect(actx.destination); osc.start(now); osc.stop(now+.28);
-  const bL = Math.floor(actx.sampleRate*.18), buf = actx.createBuffer(1,bL,actx.sampleRate), d = buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/bL,1.2);
-  const ns = actx.createBufferSource(); ns.buffer = buf;
-  const lpf = actx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=600;
-  const ng = actx.createGain(); ng.gain.setValueAtTime(0.9,now); ng.gain.exponentialRampToValueAtTime(0.001,now+.18);
-  ns.connect(lpf); lpf.connect(ng); ng.connect(actx.destination); ns.start(now); ns.stop(now+.18);
-}
-
-function playWilhelm() {
-  ensureAudio(); const now = actx.currentTime;
-  const make = (f0,f1,dur,vol) => {
-    const osc=actx.createOscillator(), g=actx.createGain(), vib=actx.createOscillator(), vg=actx.createGain();
-    vib.frequency.value=6; vg.gain.value=f0*.015; vib.connect(vg); vg.connect(osc.frequency);
-    osc.type='sawtooth'; osc.frequency.setValueAtTime(f0,now); osc.frequency.linearRampToValueAtTime(f1,now+dur*.4); osc.frequency.linearRampToValueAtTime(f0*.7,now+dur);
-    g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(vol,now+.04); g.gain.linearRampToValueAtTime(vol*.8,now+dur*.6); g.gain.exponentialRampToValueAtTime(.001,now+dur);
-    const lpf=actx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=2400;
-    osc.connect(lpf); lpf.connect(g); g.connect(actx.destination); vib.start(now); osc.start(now); vib.stop(now+dur); osc.stop(now+dur);
-  };
-  make(380,900,.55,.4); make(420,950,.55,.15);
-  const bL=Math.floor(actx.sampleRate*.55), buf=actx.createBuffer(1,bL,actx.sampleRate), d=buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*.08*Math.sin(Math.PI*i/bL);
-  const ns=actx.createBufferSource(); ns.buffer=buf;
-  const hpf=actx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=1200;
-  ns.connect(hpf); hpf.connect(actx.destination); ns.start(now); ns.stop(now+.55);
-}
-
-let rankings = [];
-function loadRankings() {
-  try { const r = localStorage.getItem('jeromin-rankings'); if (r) rankings = JSON.parse(r); } catch(e) { rankings = []; }
-}
-function saveRankings() {
-  try { localStorage.setItem('jeromin-rankings', JSON.stringify(rankings)); } catch(e) {}
-}
-function renderRanking() {
-  const rl = document.getElementById('ranking-list'); rl.innerHTML = '';
-  const s = [...rankings].sort((a,b) => b.score-a.score).slice(0,5);
-  if (!s.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468">Sin puntuaciones aún</span></li>'; return; }
-  s.forEach((e,i) => { const li=document.createElement('li'); li.innerHTML=`<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; rl.appendChild(li); });
-}
-
-const goPanel      = document.getElementById('gameover-panel');
-const defPanel     = document.getElementById('defenestration-panel');
-const instrPanel   = document.getElementById('instructions-panel');
-const saveBtn      = document.getElementById('save-btn');
-const restartBtn   = document.getElementById('restart-btn');
-const saved
+  .overlay-panel

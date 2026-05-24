@@ -2,69 +2,46 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>El Juego de Jeromín: Lluvia de Lentejas</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { background:#f0ede6; display:flex; flex-direction:column; align-items:center; min-height:100vh; min-height:100dvh; overflow:hidden; font-family:'Courier New',monospace; color:#111; touch-action:none; padding:10px; }
-  
-  /* Cabecera fluida pero con presencia */
-  #banner-wrap { width:100%; max-width:460px; margin-bottom:6px; flex-shrink:0; }
-  #banner-wrap img { width:100%; height:auto; max-height:75px; object-fit:contain; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(131,57,136,0.18); }
-  
-  #canal-btn { display:block; text-align:center; background:#833988; color:#fff; font-family:'Courier New',monospace; font-size:12px; font-weight:bold; text-decoration:none; padding:6px 12px; border-radius:20px; margin-bottom:10px; letter-spacing:.02em; box-shadow:0 2px 6px rgba(131,57,136,0.3); width:100%; max-width:460px; flex-shrink:0; }
+  body { background:#f0ede6; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:100dvh; overflow:hidden; font-family:'Courier New',monospace; color:#111; touch-action:none; padding-top:6px; }
+  #banner-wrap { width:100%; max-width:600px; margin-bottom:4px; }
+  #banner-wrap img { width:100%; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(131,57,136,0.18); }
+  #canal-btn { display:block; text-align:center; background:#833988; color:#fff; font-family:'Courier New',monospace; font-size:.75em; font-weight:bold; text-decoration:none; padding:7px 16px; border-radius:20px; margin-bottom:5px; letter-spacing:.02em; box-shadow:0 2px 6px rgba(131,57,136,0.3); }
   #canal-btn:active { background:#5a2060; }
-  
-  /* Contenedor central para agrupar HUD, Juego y Botones sin fisuras */
-  #main-container { width:100%; max-width:440px; display:flex; flex-direction:column; align-items:center; flex-grow:1; justify-content:center; gap:6px; }
-
-  #hud { display:flex; gap:12px; font-size:14px; align-items:center; flex-shrink:0; height:24px; width:100%; justify-content:center; }
-  #lives-display { display:flex; gap:3px; align-items:center; min-height:24px; }
-  #lives-display img { width:22px; height:22px; object-fit:contain; }
+  #hud { display:flex; gap:16px; margin-bottom:4px; font-size:1em; align-items:center; }
+  #lives-display { display:flex; gap:3px; align-items:center; }
+  #lives-display img { width:28px; height:28px; object-fit:contain; }
   #score-span { color:#833988; font-weight:bold; }
   #level-span { color:#a2b468; font-weight:bold; }
-  
-  /* El lienzo ahora aprovecha el ancho máximo y crece orgánicamente */
-  #game-wrap { position:relative; width:100%; display:flex; justify-content:center; align-items:center; flex-grow:1; max-height:50vh; }
-  canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); width:100%; height:100%; max-height:100%; aspect-ratio: 1 / 1.15; object-fit:contain; }
-  
-  /* Controles ergonómicos pegados inmediatamente debajo de la caja de juego */
-  #controls { display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 4px 0 4px; gap:12px; flex-shrink:0; }
-  .dir-group { display:flex; gap:14px; }
-  
-  .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:28px; width:66px; height:66px; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; touch-action:none; }
+  canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); }
+  #controls { display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 16px; gap:10px; margin-top:6px; }
+  .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:2em; width:86px; height:86px; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
   .btn:active { background:rgba(162,180,104,0.55); }
-  
-  #btn-shoot { width:76px; height:76px; font-size:32px; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; touch-action:none; }
+  #btn-shoot { width:96px; height:96px; font-size:1.8em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
-  
-  .overlay-panel { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:12px; overflow-y:auto; z-index:10; }
+  .overlay-panel { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; overflow-y:auto; }
   .overlay-panel.visible { display:flex; }
-  
-  #instructions-panel h2 { color:#833988; font-size:16px; text-align:center; margin-bottom:2px; }
-  #instructions-panel p { color:#111; font-size:12px; line-height:1.4; max-width:100%; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:10px; background:rgba(162,180,104,0.1); }
-  
-  #defenestration-panel h2 { color:#833988; font-size:16px; text-align:center; line-height:1.4; }
-  #defenestration-panel .lives-left { color:#a2b468; font-size:14px; font-weight:bold; }
-  
-  #gameover-panel h2 { color:#833988; font-size:18px; text-align:center; }
-  #gameover-panel .score-final { color:#a2b468; font-size:14px; font-weight:bold; }
-  
-  #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:14px; padding:6px 10px; border-radius:4px; text-align:center; width:80%; max-width:200px; outline:none; }
+  #instructions-panel h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:4px; }
+  #instructions-panel p { color:#111; font-size:.82em; line-height:1.7; max-width:320px; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:14px; background:rgba(162,180,104,0.1); }
+  #defenestration-panel h2 { color:#833988; font-size:1.1em; text-align:center; line-height:1.5; }
+  #defenestration-panel .lives-left { color:#a2b468; font-size:1em; font-weight:bold; }
+  #gameover-panel h2 { color:#833988; font-size:1.2em; text-align:center; }
+  #gameover-panel .score-final { color:#a2b468; font-size:1.1em; font-weight:bold; }
+  #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:1em; padding:8px 14px; border-radius:4px; text-align:center; width:200px; outline:none; }
   #name-input::placeholder { color:#aaa; }
-  
-  #ranking { width:100%; max-width:260px; margin: 2px 0; }
-  #ranking h3 { color:#833988; font-size:13px; margin-bottom:4px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:2px; }
+  #ranking { width:100%; max-width:280px; }
+  #ranking h3 { color:#833988; font-size:.95em; margin-bottom:6px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:4px; }
   #ranking-list { list-style:none; width:100%; }
-  #ranking-list li { display:flex; justify-content:space-between; font-size:11px; padding:2px 0; border-bottom:1px solid #a2b46844; color:#111; }
+  #ranking-list li { display:flex; justify-content:space-between; font-size:.85em; padding:3px 0; border-bottom:1px solid #a2b46844; color:#111; }
   #ranking-list li:first-child { color:#833988; font-weight:bold; }
-  #ranking-list li .pos { color:#a2b468; width:18px; font-weight:bold; }
-  #ranking-list li .name { flex:1; padding-left:4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #ranking-list li .pos { color:#a2b468; width:20px; font-weight:bold; }
+  #ranking-list li .name { flex:1; padding-left:6px; }
   #ranking-list li .pts { color:#833988; font-weight:bold; }
-  
-  #saved-msg { color:#a2b468; font-size:12px; min-height:1em; font-weight:bold; }
-  
-  .action-btn { font-family:'Courier New',monospace; font-size:13px; cursor:pointer; padding:8px 20px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; flex-shrink:0; }
+  #saved-msg { color:#a2b468; font-size:.85em; min-height:1em; font-weight:bold; }
+  .action-btn { font-family:'Courier New',monospace; font-size:1em; cursor:pointer; padding:9px 24px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; }
   .btn-purple { background:#833988; color:#fff; }
   .btn-purple:active { background:#5a2060; }
   .btn-green { background:#a2b468; color:#fff; }
@@ -74,65 +51,63 @@
 <body>
 
 <div id="banner-wrap">
-  <img src="CABECERA.png" alt="El Juego de Jeromín: Lluvia de Lentejas" onerror="this.style.display='none'">
+  <img src="CABECERA-mini.png" alt="El Juego de Jeromín: Lluvia de Lentejas">
 </div>
 <a id="canal-btn" href="https://youtube.com/@javiuve-truffautenpancorbo?si=A7UYQj9V6oG5OAQX" target="_blank" rel="noopener">📺 Visitar canal Javi UVE · Truffaut en PANCORBO</a>
+<div id="hud">
+  <div id="lives-display"></div>
+  <span id="score-span">Puntos: 0</span>
+  <span id="level-span">Nivel: 1</span>
+</div>
 
-<div id="main-container">
-  <div id="hud">
-    <div id="lives-display"></div>
-    <span id="score-span">Puntos: 0</span>
-    <span id="level-span">Nivel: 1</span>
+<div id="game-wrap" style="position:relative">
+  <canvas id="c"></canvas>
+  <div class="overlay-panel" id="instructions-panel">
+    <h2>📜 Cómo jugar</h2>
+    <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
+    Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
+    Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
+    <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
   </div>
+  <div class="overlay-panel" id="defenestration-panel">
+    <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
+    <div class="lives-left" id="lives-left-msg"></div>
+    <button class="action-btn btn-green" id="continue-btn">😤 Continuar</button>
+  </div>
+  <div class="overlay-panel" id="gameover-panel">
+    <h2>💀 ¡Jeromín ha muerto<br>de indigestión! 💀</h2>
+    <div class="score-final" id="score-final">Puntuación: 0</div>
+    <input id="name-input" type="text" maxlength="16" placeholder="Tu nombre aquí" autocomplete="off"/>
+    <div id="saved-msg"></div>
+    <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
+    <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
+    <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
+  </div>
+</div>
 
-  <div id="game-wrap">
-    <canvas id="c"></canvas>
-    <div class="overlay-panel" id="instructions-panel">
-      <h2>📜 Cómo jugar</h2>
-      <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
-      Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
-      ¡Ayúdale a desatar todo el poder de las legumbres!</p>
-      <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
-    </div>
-    <div class="overlay-panel" id="defenestration-panel">
-      <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
-      <div class="lives-left" id="lives-left-msg"></div>
-      <button class="action-btn btn-green" id="continue-btn">😤 Continuar</button>
-    </div>
-    <div class="overlay-panel" id="gameover-panel">
-      <h2>💀 ¡Jeromín ha muerto<br>de indigestión! 💀</h2>
-      <div class="score-final" id="score-final">Puntuación: 0</div>
-      <input id="name-input" type="text" maxlength="16" placeholder="Tu nombre aquí" autocomplete="off"/>
-      <div id="saved-msg"></div>
-      <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
-      <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
-      <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
-    </div>
-  </div>
-
-  <div id="controls">
-    <button class="btn" id="btn-shoot" aria-label="¡Dispara cucharas!">🥄</button>
-    <div class="dir-group">
-      <button class="btn" id="btn-left" aria-label="Muévete p´allá">◀</button>
-      <button class="btn" id="btn-right" aria-label="Muévete p´acá">▶</button>
-    </div>
-  </div>
+<div id="controls">
+  <button class="btn" id="btn-left" aria-label="Muévete p´allá">◀</button>
+  <button class="btn" id="btn-shoot" aria-label="'Dispara cucharas!">🥄</button>
+  <button class="btn" id="btn-right" aria-label="Muévete p´acá">▶</button>
 </div>
 
 <script>
-const jeromínImg = new Image();
-const headImg    = new Image();
+const jeromínQuietoImg   = new Image();
+const jeromínAndandoImg  = new Image();
+const jeromínComiendoImg = new Image();
+const headImg            = new Image();
 
-let jerominLoaded = false, headLoaded = false;
+let quietoLoaded = false, andandoLoaded = false, comiendoLoaded = false, headLoaded = false;
 
-jeromínImg.onload = () => { jerominLoaded = true; };
-headImg.onload    = () => { headLoaded = true; updateLivesHUD(); };
+jeromínQuietoImg.onload   = () => { quietoLoaded = true; };
+jeromínAndandoImg.onload  = () => { andandoLoaded = true; };
+jeromínComiendoImg.onload = () => { comiendoLoaded = true; };
+headImg.onload            = () => { headLoaded = true; updateLivesHUD(); };
 
-jeromínImg.onerror = () => { jerominLoaded = false; };
-headImg.onerror    = () => { headLoaded = false; updateLivesHUD(); };
-
-jeromínImg.src = 'JEROMIN-personaje.png';
-headImg.src    = 'CABECITA.png';
+jeromínQuietoImg.src   = 'JEROMIN-quieto.png';
+jeromínAndandoImg.src  = 'JEROMIN-andando.png';
+jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
+headImg.src            = 'CABECITA.png';
  
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let actx = null;
@@ -146,6 +121,10 @@ function playBite() {
   const bpf = actx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=1800; bpf.Q.value=0.8;
   const g = actx.createGain(); g.gain.setValueAtTime(1.2,now); g.gain.exponentialRampToValueAtTime(.001,now+.13);
   src.connect(bpf); bpf.connect(g); g.connect(actx.destination); src.start(now); src.stop(now+.14);
+  const osc = actx.createOscillator(), g2 = actx.createGain();
+  osc.frequency.setValueAtTime(180,now); osc.frequency.exponentialRampToValueAtTime(60,now+.08);
+  g2.gain.setValueAtTime(.6,now); g2.gain.exponentialRampToValueAtTime(.001,now+.1);
+  osc.connect(g2); g2.connect(actx.destination); osc.start(now); osc.stop(now+.1);
 }
 
 function playBagExplode() {
@@ -189,7 +168,7 @@ function saveRankings() {
 }
 function renderRanking() {
   const rl = document.getElementById('ranking-list'); rl.innerHTML = '';
-  const s = [...rankings].sort((a,b) => b.score-a.score).slice(0,5);
+  const s = [...rankings].sort((a,b) => b.score-a.score).slice(0,8);
   if (!s.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468">Sin puntuaciones aún</span></li>'; return; }
   s.forEach((e,i) => { const li=document.createElement('li'); li.innerHTML=`<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; rl.appendChild(li); });
 }
@@ -214,45 +193,49 @@ restartBtn.addEventListener('click', () => { goPanel.classList.remove('visible')
 continueBtn.addEventListener('click', () => { defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
 closeInstrBtn.addEventListener('click', () => { instrPanel.classList.remove('visible'); });
 
+function showDefenestration() {
+  livesLeftMsg.textContent = lives===1 ? '⚠️ ¡Solo te queda 1 vida!' : 'Te quedan '+lives+' vidas';
+  updateLivesHUD(); defPanel.classList.add('visible');
+}
+function showGameOver() {
+  scoreFinal.textContent = 'Puntuación: '+score;
+  document.getElementById('name-input').value = ''; savedMsg.textContent = '';
+  saveBtn.disabled = false; saveBtn.style.opacity = '1';
+  renderRanking(); goPanel.classList.add('visible');
+}
+
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
 
 function resize() {
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = Math.floor(rect.width || 400); 
-  canvas.height = Math.floor(rect.height || 460);
+  const maxW = Math.min(window.innerWidth-8, 520);
+  const availH = window.innerHeight-230;
+  const h = Math.min(availH, maxW*1.1), w = Math.min(maxW, h/1.1);
+  canvas.width = Math.floor(w); canvas.height = Math.floor(w*1.1);
+  document.getElementById('controls').style.maxWidth = canvas.width+'px';
+  document.getElementById('banner-wrap').style.maxWidth = canvas.width+'px';
   resetPositions();
 }
 window.addEventListener('resize', resize);
-window.addEventListener('load', resize);
 
 const W  = () => canvas.width,  H  = () => canvas.height;
-const OW = () => Math.floor(W()*.12), OH = () => Math.floor(OW()*1.8);
-const EW = () => Math.floor(W()*.085), EH = () => Math.floor(EW()*.85);
-const SW = () => Math.floor(W()*.015), SH = () => Math.floor(SW()*3);
+const OW = () => Math.floor(W()*.11), OH = () => Math.floor(OW()*1.9);
+const EW = () => Math.floor(W()*.082), EH = () => Math.floor(EW()*.82);
+const SW = () => Math.floor(W()*.013), SH = () => Math.floor(SW()*3);
 
 let state='waiting', score=0, lives=3, level=1;
 let btns={left:false,right:false,shoot:false}, shootPrev=false;
-let oliver={x:0,y:0,speed:0,invincible:0};
+let oliver={x:0,y:0,speed:0,invincible:0,mouthOpen:0, animFrame:0, animTimer:0};
 let spoons=[], spoonCooldown=0, enemies=[], enemyTimer=0, enemyInterval=90, explosions=[], particles=[];
 
-function resetPositions() { oliver.x=W()/2-OW()/2; oliver.y=H()-OH()-Math.floor(H()*.02); oliver.speed=W()*.009; }
-function resetGame() { score=0;lives=3;level=1; resetPositions(); oliver.invincible=0; spoons=[];enemies=[];explosions=[];particles=[]; enemyInterval=90;enemyTimer=0;spoonCooldown=0; updateLivesHUD(); }
+function resetPositions() { oliver.x=W()/2-OW()/2; oliver.y=H()-OH()-Math.floor(H()*.02); oliver.speed=W()*.008; }
+function resetGame() { score=0;lives=3;level=1; resetPositions(); oliver.invincible=0;oliver.mouthOpen=0; oliver.animFrame=0; oliver.animTimer=0; spoons=[];enemies=[];explosions=[];particles=[]; enemyInterval=90;enemyTimer=0;spoonCooldown=0; updateLivesHUD(); }
 
 function updateLivesHUD() {
   const ld = document.getElementById('lives-display'); ld.innerHTML = '';
   for (let i=0;i<lives;i++) {
-    if (headLoaded) { 
-      const im=document.createElement('img'); 
-      im.src=headImg.src; 
-      im.width=24; 
-      im.height=24; 
-      ld.appendChild(im); 
-    } else { 
-      const sp=document.createElement('span'); 
-      sp.textContent='❤️'; 
-      ld.appendChild(sp); 
-    }
+    if (headLoaded) { const im=document.createElement('img'); im.src=headImg.src; im.width=28; im.height=28; im.style.objectFit='contain'; ld.appendChild(im); }
+    else { const sp=document.createElement('span'); sp.textContent='❤️'; ld.appendChild(sp); }
   }
   document.getElementById('score-span').textContent = 'Puntos: '+score;
   document.getElementById('level-span').textContent  = 'Nivel: '+level;
@@ -273,9 +256,18 @@ function addExplosion(x,y,type) {
 function drawJeromin(x,y,inv) {
   if (inv>0 && Math.floor(inv/4)%2===0) return;
   const ow=OW(), oh=OH();
+  const goLeft = btns.left || keys['left'];
+  const goRight = btns.right || keys['right'];
    
-  if (jerominLoaded) {
-    ctx.drawImage(jeromínImg, x, y, ow, oh);
+  if (quietoLoaded && andandoLoaded && comiendoLoaded) {
+    let imgA_Dibujar = jeromínQuietoImg;
+
+    if (oliver.mouthOpen > 0) {
+      imgA_Dibujar = jeromínComiendoImg;
+    } else if (goLeft || goRight) {
+      imgA_Dibujar = oliver.animFrame === 1 ? jeromínAndandoImg : jeromínQuietoImg;
+    }
+    ctx.drawImage(imgA_Dibujar, x, y, ow, oh);
   } else {
     ctx.save();
     ctx.fillStyle='#a2b468'; ctx.fillRect(x+ow*.2,y+oh*.35,ow*.6,oh*.5);
@@ -321,8 +313,8 @@ function drawExplosion(e) {
   ctx.fillStyle=e.type==='lenteja'?'#a2b468':'#833988';
   ctx.beginPath();ctx.arc(e.x,e.y,r,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle=e.type==='lenteja'?'#728040':'#5a2060'; ctx.lineWidth=W()*.004;
-  for (let i=0; i<8; i++){const a=(i/8)*Math.PI*2; ctx.beginPath(); ctx.moveTo(e.x,e.y); ctx.lineTo(e.x+Math.cos(a)*r*1.5, e.y+Math.sin(a)*r*1.5); ctx.stroke();}
-  ctx.font=Math.floor(W()*.055)+'px serif'; ctx.textAlign='center';
+  for (let i=0;i<8;i++){const a=(i/8)*Math.PI*2;ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(e.x+Math.cos(a)*r*1.5,e.y+Math.sin(a)*r*1.5);ctx.stroke();}
+  ctx.font=Math.floor(W()*.05)+'px serif'; ctx.textAlign='center';
   ctx.fillText(e.type==='lenteja'?'💥🥣':'💥👜',e.x,e.y-r); ctx.restore();
 }
 
@@ -337,7 +329,7 @@ function drawBg() {
 
 function drawInGameScore() {
   ctx.save();
-  ctx.font = 'bold ' + Math.floor(W() * 0.05) + 'px Courier New';
+  ctx.font = 'bold ' + Math.floor(W() * 0.045) + 'px Courier New';
   ctx.textAlign = 'left';
   ctx.fillStyle = '#833988';
   ctx.shadowColor = 'rgba(247, 244, 238, 0.9)';
@@ -346,27 +338,22 @@ function drawInGameScore() {
   ctx.restore();
 }
 
+function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
+
 function drawStartScreen() {
   drawBg(); drawJeromin(oliver.x,oliver.y,0);
-  ctx.save();
   ctx.textAlign='center';
-  ctx.font='bold '+Math.floor(W()*.045)+'px Courier New'; ctx.fillStyle='#833988';
-  ctx.fillText('¡Por favor, juega de nuevo!',W()/2,H()*.28);
-  ctx.font=Math.floor(W()*.035)+'px Courier New'; ctx.fillStyle='#a2b468';
-  ctx.fillText('¡Quiero más lentejas!',W()/2,H()*.28+W()*.055);
-  
-  const bw=Math.floor(W()*.75),bh=Math.floor(H()*.075),bx=W()/2-bw/2,by=H()*.42;
-  ctx.fillStyle='#833988'; 
-  ctx.beginPath();
-  if (ctx.roundRect) { ctx.roundRect(bx,by,bw,bh,bh/2); } else { ctx.rect(bx,by,bw,bh); }
-  ctx.fill();
-  
-  ctx.font='bold '+Math.floor(W()*.032)+'px Courier New'; ctx.fillStyle='#fff';
-  ctx.fillText('📜 Instrucciones para jugar',W()/2,by+bh*.62);
-  ctx.font=Math.floor(W()*.028)+'px Courier New'; ctx.fillStyle='#555';
-  ctx.fillText('Toca 🥄 o pulsa ENTER para comenzar',W./2,H()*.62);
+  ctx.font='bold '+Math.floor(W()*.042)+'px Courier New'; ctx.fillStyle='#833988';
+  ctx.fillText('¡Por favor, juega de nuevo!',W()/2,H()*.3);
+  ctx.font=Math.floor(W()*.032)+'px Courier New'; ctx.fillStyle='#a2b468';
+  ctx.fillText('¡Quiero más lentejas!',W()/2,H()*.3+W()*.052);
+  const bw=Math.floor(W()*.72),bh=Math.floor(H()*.072),bx=W()/2-bw/2,by=H()*.44;
+  ctx.fillStyle='#833988'; roundRect(ctx,bx,by,bw,bh,bh/2); ctx.fill();
+  ctx.font='bold '+Math.floor(W()*.027)+'px Courier New'; ctx.fillStyle='#fff';
+  ctx.fillText('📜 Instrucciones para jugar',W()/2,by+bh*.65);
+  ctx.font=Math.floor(W()*.026)+'px Courier New'; ctx.fillStyle='#555';
+  ctx.fillText('Toca 🥄 o pulsa la tecla ENTER para comenzar',W()/2,H()*.62);
   canvas._instrBtn={x:bx,y:by,w:bw,h:bh};
-  ctx.restore();
 }
 
 function overlaps(ax,ay,aw,ah,bx,by,bw,bh){return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;}
@@ -377,27 +364,14 @@ function handleCanvasTap(cx,cy){
   if (b&&cx>=b.x&&cx<=b.x+b.w&&cy>=b.y&&cy<=b.y+b.h) instrPanel.classList.add('visible');
 }
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleCanvasTap((e.clientX-r.left)*(W()/r.width),(e.clientY-r.top)*(H()/r.height));});
+canvas.addEventListener('touchend',e=>{const r=canvas.getBoundingClientRect(),t=e.changedTouches[0];handleCanvasTap((t.clientX-r.left)*(W()/r.width),(t.clientY-r.top)*(H()/r.height));},{passive:true});
 
 function setupBtn(id,key){
   const el=document.getElementById(id);
-  
-  const on=e=>{
-    e.preventDefault();
-    btns[key]=true;
-    ensureAudio();
-  };
-  const off=e=>{
-    e.preventDefault();
-    btns[key]=false;
-  };
-  
-  el.addEventListener('touchstart',on,{passive:false}); 
-  el.addEventListener('touchend',off,{passive:false}); 
-  el.addEventListener('touchcancel',off,{passive:false});
-  
-  el.addEventListener('mousedown',on); 
-  el.addEventListener('mouseup',off); 
-  el.addEventListener('mouseleave',off);
+  const on=e=>{e.preventDefault();btns[key]=true;ensureAudio();};
+  const off=e=>{e.preventDefault();btns[key]=false;};
+  el.addEventListener('touchstart',on,{passive:false}); el.addEventListener('touchend',off,{passive:false}); el.addEventListener('touchcancel',off,{passive:false});
+  el.addEventListener('mousedown',on); el.addEventListener('mouseup',off); el.addEventListener('mouseleave',off);
 }
 setupBtn('btn-left','left'); setupBtn('btn-right','right'); setupBtn('btn-shoot','shoot');
 
@@ -415,19 +389,6 @@ document.addEventListener('keyup',e=>{
 
 function startGame(){ resetGame(); state='playing'; }
 
-function showDefenestration() {
-  document.getElementById('lives-left-msg').textContent = lives === 1 ? '¡Solo te queda 1 vida!' : '¡Te quedan ' + lives + ' vidas!';
-  defPanel.classList.add('visible');
-}
-
-function showGameOver() {
-  document.getElementById('score-final').textContent = 'Puntuación: ' + score;
-  document.getElementById('name-input').value = '';
-  saveBtn.disabled = false; saveBtn.style.opacity = '1';
-  savedMsg.textContent = '';
-  goPanel.classList.add('visible');
-}
-
 function gameLoop(){
   requestAnimationFrame(gameLoop);
   ctx.clearRect(0,0,W(),H());
@@ -440,12 +401,23 @@ function gameLoop(){
   if(state==='defenestration'||state==='gameover') return;
 
   drawBg();
+   
+  if (goLeft || goRight) {
+    oliver.animTimer++;
+    if (oliver.animTimer >= 10) {
+      oliver.animFrame = oliver.animFrame === 0 ? 1 : 0;
+      oliver.animTimer = 0;
+    }
+  } else {
+    oliver.animFrame = 0;
+  }
 
   if(goLeft)  oliver.x=Math.max(0,oliver.x-oliver.speed);
   if(goRight) oliver.x=Math.min(W()-OW(),oliver.x+oliver.speed);
   if(shoot&&spoonCooldown<=0){spoons.push({x:oliver.x+OW()/2-SW()/2,y:oliver.y-SH()});spoonCooldown=18;}
   if(spoonCooldown>0) spoonCooldown--;
   if(oliver.invincible>0) oliver.invincible--;
+  if(oliver.mouthOpen>0)  oliver.mouthOpen--;
 
   spoons=spoons.filter(s=>s.y>-SH()); spoons.forEach(s=>s.y-=H()*.015);
   if(++enemyTimer>=enemyInterval){spawnEnemy();enemyTimer=0;}
@@ -475,7 +447,7 @@ function gameLoop(){
           if(lives<=0){state='gameover';showGameOver();}else{state='defenestration';showDefenestration();}
         }
       } else {
-        addExplosion(e.x+EW()/2,e.y+EH()/2,'lenteja'); score+=100; playBite();
+        addExplosion(e.x+EW()/2,e.y+EH()/2,'lenteja'); score+=100; oliver.mouthOpen=20; playBite();
         const nl=Math.floor(score/1000)+1; if(nl>level){level=nl;enemyInterval=Math.max(28,90-level*8);}
         updateLivesHUD();
       }
@@ -497,8 +469,8 @@ function gameLoop(){
 
 loadRankings(); renderRanking(); updateLivesHUD();
 resize();
-setTimeout(resize, 100);
 gameLoop();
 </script>
 </body>
 </html>
+

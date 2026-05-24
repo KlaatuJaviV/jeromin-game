@@ -16,14 +16,14 @@
   
   #hud { display:flex; gap:12px; margin-bottom:4px; font-size:calc(0.85em + 0.3vw); align-items:center; flex-shrink:0; }
   #lives-display { display:flex; gap:3px; align-items:center; }
-  #lives-display img { width:24px; height:24px; object-fit:contain; }
+  #lives-display img { width:24px; height:24px; object-fit:contain; float:left; }
   #score-span { color:#833988; font-weight:bold; }
   #level-span { color:#a2b468; font-weight:bold; }
   
   #game-wrap { position:relative; width:100%; max-width:520px; display:flex; justify-content:center; align-items:center; flex-grow:1; min-height:0; }
   canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); max-width:100%; max-height:100%; object-fit:contain; }
   
-  /* Controles ergonómicos: Disparar a la izquierda, movimiento agrupado a la derecha */
+  /* Controles ergonómicos: Disparar izquierda, movimiento derecha */
   #controls { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:520px; padding:6px 8px; gap:8px; flex-shrink:0; }
   .dir-group { display:flex; gap:10px; }
   
@@ -69,7 +69,7 @@
 <body>
 
 <div id="banner-wrap">
-  <img src="CABECERA-mini.png" alt="El Juego de Jeromín: Lluvia de Lentejas" onerror="this.style.display='none'">
+  <img src="CABECERA.png" alt="El Juego de Jeromín: Lluvia de Lentejas" onerror="this.style.display='none'">
 </div>
 <a id="canal-btn" href="https://youtube.com/@javiuve-truffautenpancorbo?si=A7UYQj9V6oG5OAQX" target="_blank" rel="noopener">📺 Visitar canal Javi UVE · Truffaut en PANCORBO</a>
 <div id="hud">
@@ -81,114 +81,4 @@
 <div id="game-wrap">
   <canvas id="c"></canvas>
   <div class="overlay-panel" id="instructions-panel">
-    <h2>📜 Cómo jugar</h2>
-    <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
-    Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
-    ¡Ayúdale a desatar todo el poder de las legumbres!</p>
-    <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
-  </div>
-  <div class="overlay-panel" id="defenestration-panel">
-    <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
-    <div class="lives-left" id="lives-left-msg"></div>
-    <button class="action-btn btn-green" id="continue-btn">😤 Continuar</button>
-  </div>
-  <div class="overlay-panel" id="gameover-panel">
-    <h2>💀 ¡Jeromín ha muerto<br>de indigestión! 💀</h2>
-    <div class="score-final" id="score-final">Puntuación: 0</div>
-    <input id="name-input" type="text" maxlength="16" placeholder="Tu nombre aquí" autocomplete="off"/>
-    <div id="saved-msg"></div>
-    <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
-    <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
-    <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
-  </div>
-</div>
-
-<div id="controls">
-  <button class="btn" id="btn-shoot" aria-label="¡Dispara cucharas!">🥄</button>
-  <div class="dir-group">
-    <button class="btn" id="btn-left" aria-label="Muévete p´allá">◀</button>
-    <button class="btn" id="btn-right" aria-label="Muévete p´acá">▶</button>
-  </div>
-</div>
-
-<script>
-const jeromínQuietoImg   = new Image();
-const jeromínAndandoImg  = new Image();
-const jeromínComiendoImg = new Image();
-const headImg            = new Image();
-
-let quietoLoaded = false, andandoLoaded = false, comiendoLoaded = false, headLoaded = false;
-
-jeromínQuietoImg.onload   = () => { quietoLoaded = true; };
-jeromínAndandoImg.onload  = () => { andandoLoaded = true; };
-jeromínComiendoImg.onload = () => { comiendoLoaded = true; };
-headImg.onload            = () => { headLoaded = true; updateLivesHUD(); };
-
-// Si las imágenes fallan o no existen, el juego no se colgará
-jeromínQuietoImg.onerror   = () => { quietoLoaded = false; };
-jeromínAndandoImg.onerror  = () => { andandoLoaded = false; };
-jeromínComiendoImg.onerror = () => { comiendoLoaded = false; };
-headImg.onerror            = () => { headLoaded = false; updateLivesHUD(); };
-
-jeromínQuietoImg.src   = 'JEROMIN-quieto.png';
-jeromínAndandoImg.src  = 'JEROMIN-andando.png';
-jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
-headImg.src            = 'CABECITA.png';
- 
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let actx = null;
-function ensureAudio() { if (!actx) actx = new AudioCtx(); }
-
-function playBite() {
-  ensureAudio(); const now = actx.currentTime;
-  const bL = actx.sampleRate*.12, buf = actx.createBuffer(1,bL,actx.sampleRate), d = buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/bL,2);
-  const src = actx.createBufferSource(); src.buffer = buf;
-  const bpf = actx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=1800; bpf.Q.value=0.8;
-  const g = actx.createGain(); g.gain.setValueAtTime(1.2,now); g.gain.exponentialRampToValueAtTime(.001,now+.13);
-  src.connect(bpf); bpf.connect(g); g.connect(actx.destination); src.start(now); src.stop(now+.14);
-}
-
-function playBagExplode() {
-  ensureAudio(); const now = actx.currentTime;
-  const osc = actx.createOscillator(), g = actx.createGain();
-  osc.type='sine'; osc.frequency.setValueAtTime(120,now); osc.frequency.exponentialRampToValueAtTime(30,now+.25);
-  g.gain.setValueAtTime(1.0,now); g.gain.exponentialRampToValueAtTime(0.001,now+.28);
-  osc.connect(g); g.connect(actx.destination); osc.start(now); osc.stop(now+.28);
-  const bL = Math.floor(actx.sampleRate*.18), buf = actx.createBuffer(1,bL,actx.sampleRate), d = buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/bL,1.2);
-  const ns = actx.createBufferSource(); ns.buffer = buf;
-  const lpf = actx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=600;
-  const ng = actx.createGain(); ng.gain.setValueAtTime(0.9,now); ng.gain.exponentialRampToValueAtTime(0.001,now+.18);
-  ns.connect(lpf); lpf.connect(ng); ng.connect(actx.destination); ns.start(now); ns.stop(now+.18);
-}
-
-function playWilhelm() {
-  ensureAudio(); const now = actx.currentTime;
-  const make = (f0,f1,dur,vol) => {
-    const osc=actx.createOscillator(), g=actx.createGain(), vib=actx.createOscillator(), vg=actx.createGain();
-    vib.frequency.value=6; vg.gain.value=f0*.015; vib.connect(vg); vg.connect(osc.frequency);
-    osc.type='sawtooth'; osc.frequency.setValueAtTime(f0,now); osc.frequency.linearRampToValueAtTime(f1,now+dur*.4); osc.frequency.linearRampToValueAtTime(f0*.7,now+dur);
-    g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(vol,now+.04); g.gain.linearRampToValueAtTime(vol*.8,now+dur*.6); g.gain.exponentialRampToValueAtTime(.001,now+dur);
-    const lpf=actx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=2400;
-    osc.connect(lpf); lpf.connect(g); g.connect(actx.destination); vib.start(now); osc.start(now); vib.stop(now+dur); osc.stop(now+dur);
-  };
-  make(380,900,.55,.4); make(420,950,.55,.15);
-  const bL=Math.floor(actx.sampleRate*.55), buf=actx.createBuffer(1,bL,actx.sampleRate), d=buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*.08*Math.sin(Math.PI*i/bL);
-  const ns=actx.createBufferSource(); ns.buffer=buf;
-  const hpf=actx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=1200;
-  ns.connect(hpf); hpf.connect(actx.destination); ns.start(now); ns.stop(now+.55);
-}
-
-let rankings = [];
-function loadRankings() {
-  try { const r = localStorage.getItem('jeromin-rankings'); if (r) rankings = JSON.parse(r); } catch(e) { rankings = []; }
-}
-function saveRankings() {
-  try { localStorage.setItem('jeromin-rankings', JSON.stringify(rankings)); } catch(e) {}
-}
-function renderRanking() {
-  const rl = document.getElementById('ranking-list'); rl.innerHTML = '';
-  const s = [...rankings].sort((a,b) => b.score-a.score).slice(0,5);
-  if (!s.length) { rl.innerHTML = '<li><span class="name" style="
+    <h2>📜 Cómo

@@ -40,7 +40,7 @@
   #ranking h3 { color:#833988; font-size:.95em; margin-bottom:6px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:4px; }
   #ranking-list { list-style:none; width:100%; }
   #ranking-list li { display:flex; justify-content:space-between; font-size:.85em; padding:3px 0; border-bottom:1px solid #a2b46844; color:#111; }
-  #ranking-list li:first-child { color:#833888; font-weight:bold; }
+  #ranking-list li:first-child { color:#833988; font-weight:bold; }
   #ranking-list li .pos { color:#a2b468; width:20px; font-weight:bold; }
   #ranking-list li .name { flex:1; padding-left:6px; }
   #ranking-list li .pts { color:#833988; font-weight:bold; }
@@ -97,7 +97,13 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const SUPABASE_URL = 'https://wybgccvbriuntzuuqnli.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_CJRNg3UY5LYpRNsfsf3uQA_bu8uliIK';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const jeromínQuietoImg   = new Image();
 const jeromínAndandoImg  = new Image();
 const jeromínComiendoImg = new Image();
@@ -166,17 +172,28 @@ function playWilhelm() {
 }
 
 let rankings = [];
-function loadRankings() {
-  try { const r = localStorage.getItem('jeromin-rankings'); if (r) rankings = JSON.parse(r); } catch(e) { rankings = []; }
+
+// MODIFICADO: Traer ranking global remoto desde Supabase
+async function loadRankings() {
+  try {
+    const { data, error } = await supabase
+      .from('rankings')
+      .select('name, score')
+      .order('score', { ascending: false })
+      .limit(8);
+
+    if (error) throw error;
+    rankings = data || [];
+  } catch(e) {
+    console.error("Error cargando ranking global de Supabase:", e);
+    rankings = [];
+  }
 }
-function saveRankings() {
-  try { localStorage.setItem('jeromin-rankings', JSON.stringify(rankings)); } catch(e) {}
-}
+
 function renderRanking() {
   const rl = document.getElementById('ranking-list'); rl.innerHTML = '';
-  const s = [...rankings].sort((a,b) => b.score-a.score).slice(0,8);
-  if (!s.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468">Sin puntuaciones aún</span></li>'; return; }
-  s.forEach((e,i) => { const li=document.createElement('li'); li.innerHTML=`<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; rl.appendChild(li); });
+  if (!rankings.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468">Sin puntuaciones aún</span></li>'; return; }
+  rankings.forEach((e,i) => { const li=document.createElement('li'); li.innerHTML=`<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; rl.appendChild(li); });
 }
 
 const goPanel      = document.getElementById('gameover-panel');
@@ -190,11 +207,30 @@ const livesLeftMsg = document.getElementById('lives-left-msg');
 const continueBtn  = document.getElementById('continue-btn');
 const closeInstrBtn= document.getElementById('close-instructions-btn');
 
-saveBtn.addEventListener('click', () => {
+// MODIFICADO: Enviar datos a la base de datos remota
+saveBtn.addEventListener('click', async () => {
   const name = document.getElementById('name-input').value.trim() || 'Anónimo';
-  rankings.push({name, score}); saveRankings(); renderRanking();
-  savedMsg.textContent = '✅ ¡Guardado!'; saveBtn.disabled = true; saveBtn.style.opacity = '.5';
+  saveBtn.disabled = true;
+  savedMsg.textContent = '⏳ Guardando marca global...';
+
+  try {
+    const { error } = await supabase
+      .from('rankings')
+      .insert([{ name, score }]);
+
+    if (error) throw error;
+
+    savedMsg.textContent = '✅ ¡Guardado globalmente!';
+    saveBtn.style.opacity = '.5';
+    await loadRankings();
+    renderRanking();
+  } catch (e) {
+    console.error(e);
+    savedMsg.textContent = '❌ Error de conexión';
+    saveBtn.disabled = false;
+  }
 });
+
 restartBtn.addEventListener('click', () => { goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; });
 continueBtn.addEventListener('click', () => { defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
 closeInstrBtn.addEventListener('click', () => { instrPanel.classList.remove('visible'); });
@@ -203,11 +239,15 @@ function showDefenestration() {
   livesLeftMsg.textContent = lives===1 ? '⚠️ ¡Solo te queda 1 vida!' : 'Te quedan '+lives+' vidas';
   updateLivesHUD(); defPanel.classList.add('visible');
 }
-function showGameOver() {
+
+// MODIFICADO: Asegurar la consulta asíncrona fresca de datos antes de pintar la pantalla de GameOver
+async function showGameOver() {
   scoreFinal.textContent = 'Puntuación: '+score;
   document.getElementById('name-input').value = ''; savedMsg.textContent = '';
   saveBtn.disabled = false; saveBtn.style.opacity = '1';
-  renderRanking(); goPanel.classList.add('visible');
+  await loadRankings();
+  renderRanking(); 
+  goPanel.classList.add('visible');
 }
 
 const canvas = document.getElementById('c');
@@ -231,7 +271,6 @@ const SW = () => Math.floor(W()*.013), SH = () => Math.floor(SW()*3);
 
 let state='waiting', score=0, lives=3, level=1;
 let btns={left:false,right:false,shoot:false}, shootPrev=false;
-// MODIFICADO: Añadido "facing" en oliver para controlar la orientación ('left' por defecto)
 let oliver={x:0,y:0,speed:0,invincible:0,mouthOpen:0, animFrame:0, animTimer:0, facing:'left'};
 let spoons=[], spoonCooldown=0, enemies=[], enemyTimer=0, enemyInterval=90, explosions=[], particles=[];
 
@@ -260,7 +299,6 @@ function addExplosion(x,y,type) {
   for (let i=0;i<12;i++) particles.push({x,y, vx:(Math.random()-.5)*W()*.012, vy:(Math.random()-.5)*W()*.012, life:30+Math.random()*20, color:type==='lenteja'?'#a2b468':'#833988', r:W()*.005+Math.random()*W()*.006});
 }
 
-// MODIFICADO: La función drawJeromin ahora invierte la imagen en el eje X si oliver.facing === 'right'
 function drawJeromin(x,y,inv) {
   if (inv>0 && Math.floor(inv/4)%2===0) return;
   const ow=OW(), oh=OH();
@@ -277,7 +315,6 @@ function drawJeromin(x,y,inv) {
     }
     
     ctx.save();
-    // Si mira a la derecha, trasladamos el origen al centro horizontal del sprite y escalamos negativamente en X
     if (oliver.facing === 'right') {
       ctx.translate(x + ow / 2, y + oh / 2);
       ctx.scale(-1, 1);
@@ -427,7 +464,6 @@ function gameLoop(){
       oliver.animFrame = oliver.animFrame === 0 ? 1 : 0;
       oliver.animTimer = 0;
     }
-    // MODIFICADO: Actualizar la dirección en la que está mirando Jeromín
     if (goLeft) oliver.facing = 'left';
     if (goRight) oliver.facing = 'right';
   } else {
@@ -489,9 +525,14 @@ function gameLoop(){
   drawInGameScore();
 }
 
-loadRankings(); renderRanking(); updateLivesHUD();
-resize();
-gameLoop();
+// NUEVO: Función auto-ejecutable inicial para arrancar el entorno asíncronamente
+(async () => {
+  await loadRankings();
+  renderRanking(); 
+  updateLivesHUD();
+  resize();
+  gameLoop();
+})();
 </script>
 </body>
 </html>

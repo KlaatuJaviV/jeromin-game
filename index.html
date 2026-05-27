@@ -264,9 +264,13 @@ jeromínAndandoImg.src  = 'JEROMIN-andando.png';
 jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
 headImg.src            = 'CABECITA.png';
 
-// CARGA DE AUDIOS DESDE TU REPOSITORIO GITHUB (Misma carpeta que el index)
+// CARGA DE AUDIOS DESDE TU REPOSITORIO GITHUB
 const audioLentejitas = new Audio('LENTEJITAS.mp3');
 const audioJolines    = new Audio('JOLINES.mp3');
+const audioMusicota   = new Audio('MUSICOTA.mp3');
+
+// Configuración de la música en bucle
+audioMusicota.loop = true;
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let actx = null;
@@ -277,7 +281,6 @@ function ensureAudio() {
 
 function playBite() {
   ensureAudio();
-  // Reproducción del archivo de audio personalizado de lentejas
   audioLentejitas.currentTime = 0;
   audioLentejitas.play().catch(e => console.log("Error de audio:", e));
 }
@@ -298,7 +301,8 @@ function playBagExplode() {
 
 function playWilhelm() {
   ensureAudio();
-  // Reproducción del archivo de audio personalizado al ser dañado/muerto
+  // Pausar música durante las pantallas de muerte/defenestración
+  audioMusicota.pause();
   audioJolines.currentTime = 0;
   audioJolines.play().catch(e => console.log("Error de audio:", e));
 }
@@ -402,7 +406,14 @@ function cleanControls() {
 }
 
 restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; htmlInstrBtn.classList.add('visible'); htmlRnkBtn.classList.add('visible'); });
-continueBtn.addEventListener('click', () => { cleanControls(); defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
+continueBtn.addEventListener('click', () => { 
+  cleanControls(); 
+  defPanel.classList.remove('visible'); 
+  oliver.invincible = 120; 
+  state = 'playing'; 
+  // Reanudar música al continuar
+  audioMusicota.play().catch(e => console.log(e));
+});
 
 htmlInstrBtn.addEventListener('click', () => { ensureAudio(); instrPanel.classList.add('visible'); document.getElementById('instructions-inner').scrollTop = 0; });
 const hideInstructions = () => { cleanControls(); instrPanel.classList.remove('visible'); };
@@ -691,6 +702,7 @@ document.addEventListener('keydown', e => {
       defPanel.classList.remove('visible'); 
       oliver.invincible = 120; 
       state = 'playing';
+      audioMusicota.play().catch(p => console.log(p));
       return;
     }
     
@@ -720,7 +732,15 @@ document.addEventListener('keyup',e=>{
   if(e.key==='Enter') keys['shoot']=false;
 });
 
-function startGame(){ resetGame(); state='playing'; htmlInstrBtn.classList.remove('visible'); htmlRnkBtn.classList.remove('visible'); }
+function startGame(){ 
+  resetGame(); 
+  state='playing'; 
+  htmlInstrBtn.classList.remove('visible'); 
+  htmlRnkBtn.classList.remove('visible'); 
+  // Iniciar la música en bucle cuando el juego arranca
+  audioMusicota.currentTime = 0;
+  audioMusicota.play().catch(e => console.log("Error de música:", e));
+}
 
 function gameLoop(){
   requestAnimationFrame(gameLoop);

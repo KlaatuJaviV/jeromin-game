@@ -2,75 +2,118 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>El Juego de Jeromín: Lluvia de Lentejas</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { background:#f0ede6; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:100dvh; overflow:hidden; font-family:'Courier New',monospace; color:#111; touch-action:none; padding-top:6px; }
-  #banner-wrap { width:100%; max-width:600px; margin-bottom:4px; }
+  
+  /* FUERZA A QUE TODO QUEPA EN LA PANTALLA SIN SCROLL GENERAL */
+  body { 
+    background:#f0ede6; 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    justify-content:space-between; 
+    height:100dvh; 
+    max-height:100dvh;
+    overflow:hidden; 
+    font-family:'Courier New',monospace; 
+    color:#111; 
+    touch-action:none; 
+    padding: 8px 4px;
+  }
+
+  /* ZONA SUPERIOR: Compacta y flexible */
+  #header-container {
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex-shrink:0;
+    gap: 4px;
+  }
+  #banner-wrap { width:100%; max-width:500px; }
   #banner-wrap img { width:100%; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(131,57,136,0.18); }
-  #canal-btn { display:block; text-align:center; background:#833988; color:#fff; font-family:'Courier New',monospace; font-size:.75em; font-weight:bold; text-decoration:none; padding:7px 16px; border-radius:20px; margin-bottom:5px; letter-spacing:.02em; box-shadow:0 2px 6px rgba(131,57,136,0.3); }
+  #canal-btn { display:block; text-align:center; background:#833988; color:#fff; font-family:'Courier New',monospace; font-size:.72em; font-weight:bold; text-decoration:none; padding:6px 14px; border-radius:20px; letter-spacing:.02em; box-shadow:0 2px 6px rgba(131,57,136,0.3); width:fit-content; }
   #canal-btn:active { background:#5a2060; }
-  #hud { display:flex; gap:16px; margin-bottom:4px; font-size:1em; align-items:center; }
+  
+  #hud { display:flex; gap:14px; font-size:0.9em; align-items:center; margin-top:2px; }
   #lives-display { display:flex; gap:3px; align-items:center; }
-  #lives-display img { width:28px; height:28px; object-fit:contain; }
+  #lives-display img { width:24px; height:24px; object-fit:contain; }
   #score-span { color:#833988; font-weight:bold; }
   #level-span { color:#a2b468; font-weight:bold; }
   
-  #game-container { position:relative; display:block; }
+  /* ZONA CENTRAL: El contenedor del juego se estira en el espacio sobrante */
+  #game-container { 
+    position:relative; 
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-grow:1; 
+    width:100%;
+    min-height:0; /* Permite al contenedor encogerse si el espacio es crítico */
+  }
   canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); }
   
-  #btn-trigger-instructions { position:absolute; top:44%; left:50%; transform:translate(-50%, -50%); display:none; background:#833988; color:#fff; border:none; font-family:'Courier New',monospace; font-size:1em; font-weight:bold; padding:12px 24px; border-radius:30px; cursor:pointer; box-shadow:0 4px 10px rgba(131,57,136,0.3); z-index:5; width:80%; max-width:280px; text-align:center; }
+  #btn-trigger-instructions { position:absolute; top:44%; left:50%; transform:translate(-50%, -50%); display:none; background:#833988; color:#fff; border:none; font-family:'Courier New',monospace; font-size:0.9em; font-weight:bold; padding:10px 20px; border-radius:30px; cursor:pointer; box-shadow:0 4px 10px rgba(131,57,136,0.3); z-index:5; width:75%; max-width:240px; text-align:center; }
   #btn-trigger-instructions.visible { display:block; }
   #btn-trigger-instructions:active { background:#5a2060; }
 
-  #controls { display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 16px; gap:10px; margin-top:6px; }
-  
+  /* ZONA INFERIOR: Botonera adaptativa anclada abajo */
+  #controls { 
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between; 
+    width:100%; 
+    padding:4px 8px; 
+    gap:10px; 
+    flex-shrink:0;
+  }
   .dir-group { display:flex; gap:6px; }
   
-  .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:2em; width:86px; height:86px; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
+  /* Botones calculados con alturas dinámicas máx para que no empujen hacia arriba */
+  .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:1.8em; width:76px; height:76px; max-width:18vw; max-height:18vw; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
   .btn:active { background:rgba(162,180,104,0.55); }
-  #btn-shoot { width:96px; height:96px; font-size:1.8em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
+  #btn-shoot { width:86px; height:86px; max-width:21vw; max-height:21vw; font-size:1.6em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
   
-  /* Paneles superpuestos del Canvas */
-  .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:14px; z-index:10; }
+  /* Paneles mecánicos internos del Canvas */
+  .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px; z-index:10; }
   .overlay-panel.visible { display:flex; }
 
-  /* Modal de Instrucciones */
+  /* Modal Flotante de Instrucciones (Indestructible) */
   #instructions-panel { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; padding:20px; }
   #instructions-panel.visible { display:flex; }
-  #instructions-card { background:#f7f4ee; border:3px solid #833988; border-radius:12px; width:100%; max-width:340px; max-height:80dvh; display:flex; flex-direction:column; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
-  #instructions-inner { width: 100%; overflow-y: auto; padding-right: 6px; margin-bottom: 14px; }
+  #instructions-card { background:#f7f4ee; border:3px solid #833988; border-radius:12px; width:100%; max-width:340px; max-height:75dvh; display:flex; flex-direction:column; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+  #instructions-inner { width: 100%; overflow-y: auto; padding-right: 4px; margin-bottom: 12px; }
   
-  /* Scrollbars estéticos */
+  /* Scrollbars visuales */
   #instructions-inner::-webkit-scrollbar, #ranking::-webkit-scrollbar { width: 5px; }
   #instructions-inner::-webkit-scrollbar-track, #ranking::-webkit-scrollbar-track { background: rgba(162,180,104,0.05); border-radius: 4px; }
   #instructions-inner::-webkit-scrollbar-thumb, #ranking::-webkit-scrollbar-thumb { background: #a2b468; border-radius: 4px; }
 
-  #instructions-panel h2 { color:#833988; font-size:1.2em; text-align:center; margin-bottom:12px; flex-shrink:0; }
-  #instructions-panel p { color:#111; font-size:.85em; line-height:1.6; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:12px; background:rgba(162,180,104,0.06); }
+  #instructions-panel h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:10px; flex-shrink:0; }
+  #instructions-panel p { color:#111; font-size:.8em; line-height:1.5; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:10px; background:rgba(162,180,104,0.06); }
   
-  #defenestration-panel h2 { color:#833988; font-size:1.1em; text-align:center; line-height:1.5; }
-  #defenestration-panel .lives-left { color:#a2b468; font-size:1em; font-weight:bold; }
+  #defenestration-panel h2 { color:#833988; font-size:1em; text-align:center; line-height:1.4; }
+  #defenestration-panel .lives-left { color:#a2b468; font-size:0.9em; font-weight:bold; }
   
-  #gameover-panel h2 { color:#833988; font-size:1.1em; text-align:center; }
-  #gameover-panel .score-final { color:#a2b468; font-size:1em; font-weight:bold; }
-  #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:0.9em; padding:6px 12px; border-radius:4px; text-align:center; width:180px; outline:none; }
+  #gameover-panel h2 { color:#833988; font-size:1.05em; text-align:center; }
+  #gameover-panel .score-final { color:#a2b468; font-size:0.95em; font-weight:bold; }
+  #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:0.85em; padding:5px 10px; border-radius:4px; text-align:center; width:170px; outline:none; }
   #name-input::placeholder { color:#aaa; }
   
-  /* CORRECCIÓN: Contenedor de Ranking blindado ante desbordamientos */
-  #ranking { width:100%; max-width:260px; overflow-y:auto; max-height:115px; border: 1.5px solid rgba(162,180,104,0.4); border-radius: 6px; padding: 6px 8px; background: rgba(255,255,255,0.3); }
-  #ranking h3 { color:#833988; font-size:.85em; margin-bottom:4px; text-align:center; border-bottom:1.5px solid #a2b468; padding-bottom:2px; position: sticky; top: 0; background: #f7f4ee; }
+  #ranking { width:100%; max-width:240px; overflow-y:auto; max-height:95px; border: 1.5px solid rgba(162,180,104,0.3); border-radius: 6px; padding: 4px 6px; background: rgba(255,255,255,0.3); }
+  #ranking h3 { color:#833988; font-size:.8em; margin-bottom:2px; text-align:center; border-bottom:1.5px solid #a2b468; padding-bottom:2px; position: sticky; top: 0; background: #f7f4ee; }
   #ranking-list { list-style:none; width:100%; }
-  #ranking-list li { display:flex; justify-content:space-between; font-size:.8em; padding:3px 0; border-bottom:1px solid #a2b46822; color:#111; }
+  #ranking-list li { display:flex; justify-content:space-between; font-size:.75em; padding:2px 0; border-bottom:1px solid #a2b46811; color:#111; }
   #ranking-list li:first-child { color:#833988; font-weight:bold; }
-  #ranking-list li .pos { color:#a2b468; width:18px; font-weight:bold; }
+  #ranking-list li .pos { color:#a2b468; width:16px; font-weight:bold; }
   #ranking-list li .name { flex:1; padding-left:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align: left; }
   #ranking-list li .pts { color:#833988; font-weight:bold; }
   
-  #saved-msg { color:#a2b468; font-size:.8em; min-height:1.1em; font-weight:bold; }
-  .action-btn { font-family:'Courier New',monospace; font-size:0.95em; cursor:pointer; padding:8px 20px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.02em; flex-shrink:0; text-align:center; }
+  #saved-msg { color:#a2b468; font-size:.75em; min-height:1.1em; font-weight:bold; }
+  .action-btn { font-family:'Courier New',monospace; font-size:0.9em; cursor:pointer; padding:6px 18px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.01em; flex-shrink:0; text-align:center; }
   .btn-purple { background:#833988; color:#fff; }
   .btn-purple:active { background:#5a2060; }
   .btn-green { background:#a2b468; color:#fff; }
@@ -79,14 +122,16 @@
 </head>
 <body>
 
-<div id="banner-wrap">
-  <img src="CABECERA-mini.png" alt="El Juego de Jeromín: Lluvia de Lentejas">
-</div>
-<a id="canal-btn" href="https://youtube.com/@javiuve-truffautenpancorbo?si=A7UYQj9V6oG5OAQX" target="_blank" rel="noopener">📺 Visitar canal Javi UVE · Truffaut en PANCORBO</a>
-<div id="hud">
-  <div id="lives-display"></div>
-  <span id="score-span">Puntos: 0</span>
-  <span id="level-span">Nivel: 1</span>
+<div id="header-container">
+  <div id="banner-wrap">
+    <img src="CABECERA-mini.png" alt="El Juego de Jeromín: Lluvia de Lentejas">
+  </div>
+  <a id="canal-btn" href="https://youtube.com/@javiuve-truffautenpancorbo?si=A7UYQj9V6oG5OAQX" target="_blank" rel="noopener">📺 Visitar canal Javi UVE · Truffaut en PANCORBO</a>
+  <div id="hud">
+    <div id="lives-display"></div>
+    <span id="score-span">Puntos: 0</span>
+    <span id="level-span">Nivel: 1</span>
+  </div>
 </div>
 
 <div id="game-container">
@@ -213,7 +258,7 @@ async function loadRankings() {
       .from('rankings')
       .select('name, score')
       .order('score', { ascending: false })
-      .limit(10); // Cargamos un pequeño cojín extra
+      .limit(10);
 
     if (error) throw error;
     rankings = data || [];
@@ -227,9 +272,7 @@ function renderRanking() {
   const rl = document.getElementById('ranking-list'); rl.innerHTML = '';
   if (!rankings.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468; text-align:center;">Sin marcas aún</span></li>'; return; }
   
-  // CORRECCIÓN VISUAL: Solo pintamos un máximo de 5 filas en pantalla para no reventar la interfaz del panel
   const visualTop = rankings.slice(0, 5);
-  
   visualTop.forEach((e,i) => { 
     const li = document.createElement('li'); 
     li.innerHTML = `<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; 
@@ -311,18 +354,30 @@ async function showGameOver() {
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
 
+// ESCALADO MATEMÁTICO INTEGRAL: El Canvas calcula el espacio exacto disponible entre el HUD y la botonera
 function resize() {
-  const maxW = Math.min(window.innerWidth-8, 520);
-  const availH = window.innerHeight-230;
-  const h = Math.min(availH, maxW*1.1), w = Math.min(maxW, h/1.1);
-  canvas.width = Math.floor(w); canvas.height = Math.floor(w*1.1);
-  document.getElementById('controls').style.maxWidth = canvas.width+'px';
-  document.getElementById('banner-wrap').style.maxWidth = canvas.width+'px';
-  document.getElementById('game-container').style.width = canvas.width+'px';
-  document.getElementById('game-container').style.height = canvas.height+'px';
+  const maxW = Math.min(window.innerWidth - 8, 500);
+  
+  // Calculamos el alto del contenedor central restando la cabecera y el panel de control
+  const headerH = document.getElementById('header-container').offsetHeight;
+  const controlsH = document.getElementById('controls').offsetHeight;
+  const availH = window.innerHeight - headerH - controlsH - 16; // Margen de seguridad extra
+  
+  // Ajustamos manteniendo la relación de aspecto 1 : 1.1
+  const h = Math.min(availH, maxW * 1.1);
+  const w = Math.min(maxW, h / 1.1);
+  
+  canvas.width = Math.floor(w); 
+  canvas.height = Math.floor(w * 1.1);
+  
+  document.getElementById('controls').style.maxWidth = canvas.width + 'px';
+  document.getElementById('header-container').style.maxWidth = canvas.width + 'px';
+  
   resetPositions();
 }
 window.addEventListener('resize', resize);
+// Ejecutamos también un observador cuando cambie el tamaño del header por carga diferida de imágenes
+new ResizeObserver(resize).observe(document.getElementById('header-container'));
 
 const W  = () => canvas.width,  H  = () => canvas.height;
 const OW = () => Math.floor(W()*.11), OH = () => Math.floor(OW()*1.9);
@@ -340,7 +395,7 @@ function resetGame() { score=0;lives=3;level=1; resetPositions(); oliver.invinci
 function updateLivesHUD() {
   const ld = document.getElementById('lives-display'); ld.innerHTML = '';
   for (let i=0;i<lives;i++) {
-    if (headLoaded) { const im=document.createElement('img'); im.src=headImg.src; im.width=28; im.height=28; im.style.objectFit='contain'; ld.appendChild(im); }
+    if (headLoaded) { const im=document.createElement('img'); im.src=headImg.src; im.width=24; im.height=24; im.style.objectFit='contain'; ld.appendChild(im); }
     else { const sp=document.createElement('span'); sp.textContent='❤️'; ld.appendChild(sp); }
   }
   document.getElementById('score-span').textContent = 'Puntos: '+score;

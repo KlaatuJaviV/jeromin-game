@@ -33,21 +33,23 @@
   #btn-shoot { width:96px; height:96px; font-size:1.8em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
   
-  /* Paneles flotantes sobre el juego */
+  /* Paneles superpuestos del Canvas mecánico */
   .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; z-index:10; }
   .overlay-panel.visible { display:flex; }
+
+  /* SOLUCIÓN TOTAL INSTRUCCIONES: Modal flotante independiente del tamaño del juego */
+  #instructions-panel { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; padding:20px; }
+  #instructions-panel.visible { display:flex; }
+  #instructions-card { background:#f7f4ee; border:3px solid #833988; border-radius:12px; width:100%; max-width:340px; max-height:80dvh; display:flex; flex-direction:column; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+  #instructions-inner { width: 100%; overflow-y: auto; padding-right: 6px; margin-bottom: 14px; }
   
-  /* CORRECCIÓN: Estilos optimizados y con scroll para las instrucciones */
-  #instructions-panel { justify-content: flex-start; padding: 16px; }
-  #instructions-inner { width: 100%; max-height: 85%; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-  
-  /* Personalización de la barrita de scroll para que quede bonita */
+  /* Scrollbar estético */
   #instructions-inner::-webkit-scrollbar { width: 6px; }
   #instructions-inner::-webkit-scrollbar-track { background: rgba(162,180,104,0.1); border-radius: 4px; }
   #instructions-inner::-webkit-scrollbar-thumb { background: #a2b468; border-radius: 4px; }
 
-  #instructions-panel h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:2px; }
-  #instructions-panel p { color:#111; font-size:.82em; line-height:1.6; width:100%; max-width:320px; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:12px; background:rgba(162,180,104,0.08); }
+  #instructions-panel h2 { color:#833988; font-size:1.2em; text-align:center; margin-bottom:12px; flex-shrink:0; }
+  #instructions-panel p { color:#111; font-size:.85em; line-height:1.6; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:12px; background:rgba(162,180,104,0.06); }
   
   #defenestration-panel h2 { color:#833988; font-size:1.1em; text-align:center; line-height:1.5; }
   #defenestration-panel .lives-left { color:#a2b468; font-size:1em; font-weight:bold; }
@@ -59,12 +61,12 @@
   #ranking h3 { color:#833988; font-size:.95em; margin-bottom:6px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:4px; }
   #ranking-list { list-style:none; width:100%; }
   #ranking-list li { display:flex; justify-content:space-between; font-size:.85em; padding:3px 0; border-bottom:1px solid #a2b46844; color:#111; }
-  #ranking-list li :first-child { color:#833988; font-weight:bold; }
+  #ranking-list li:first-child { color:#833988; font-weight:bold; }
   #ranking-list li .pos { color:#a2b468; width:20px; font-weight:bold; }
-  #ranking-list li .name { flex:1; padding-left:6px; }
+  #ranking-list li .name { flex:1; padding-left:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #ranking-list li .pts { color:#833988; font-weight:bold; }
   #saved-msg { color:#a2b468; font-size:.85em; min-height:1em; font-weight:bold; }
-  .action-btn { font-family:'Courier New',monospace; font-size:1em; cursor:pointer; padding:9px 24px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; flex-shrink:0; }
+  .action-btn { font-family:'Courier New',monospace; font-size:1em; cursor:pointer; padding:10px 24px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; flex-shrink:0; text-align:center; }
   .btn-purple { background:#833988; color:#fff; }
   .btn-purple:active { background:#5a2060; }
   .btn-green { background:#a2b468; color:#fff; }
@@ -87,16 +89,6 @@
   <canvas id="c"></canvas>
   
   <button id="btn-trigger-instructions" class="visible">📜 Cómo jugar</button>
-
-  <div class="overlay-panel" id="instructions-panel">
-    <div id="instructions-inner">
-      <h2>📜 Cómo jugar</h2>
-      <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
-      Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
-      Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
-    </div>
-    <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
-  </div>
   
   <div class="overlay-panel" id="defenestration-panel">
     <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
@@ -112,6 +104,18 @@
     <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
     <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
     <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
+  </div>
+</div>
+
+<div id="instructions-panel">
+  <div id="instructions-card">
+    <h2>📜 Cómo jugar</h2>
+    <div id="instructions-inner">
+      <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
+      Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
+      Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
+    </div>
+    <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
   </div>
 </div>
 
@@ -210,7 +214,7 @@ async function loadRankings() {
     if (error) throw error;
     rankings = data || [];
   } catch(e) {
-    console.error("Error cargando ranking global de Supabase:", e);
+    console.error("Error cargando ranking global:", e);
     rankings = [];
   }
 }
@@ -239,14 +243,27 @@ saveBtn.addEventListener('click', async () => {
   savedMsg.textContent = '⏳ Guardando marca global...';
 
   try {
-    const { error } = await supabase
+    // 1. Insertamos el nuevo récord
+    const { error: insertError } = await supabase
       .from('rankings')
       .insert([{ name, score }]);
 
-    if (error) throw error;
+    if (insertError) throw insertError;
 
-    savedMsg.textContent = '✅ ¡Guardado globalmente!';
+    savedMsg.textContent = '✅ ¡Guardado!';
     saveBtn.style.opacity = '.5';
+
+    // OPTIMIZACIÓN EN CALIENTE: Limpieza automática para que el ranking no crezca sin límite
+    const { data: allScores } = await supabase
+      .from('rankings')
+      .select('id')
+      .order('score', { ascending: false });
+
+    if (allScores && allScores.length > 20) {
+      const idsToDelete = allScores.slice(20).map(row => row.id);
+      await supabase.from('rankings').delete().in('id', idsToDelete);
+    }
+
     await loadRankings();
     renderRanking();
   } catch (e) {

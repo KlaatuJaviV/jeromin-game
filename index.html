@@ -20,7 +20,6 @@
   #game-container { position:relative; display:block; }
   canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); }
   
-  /* Botón HTML nativo sobre el canvas en la pantalla de inicio */
   #btn-trigger-instructions { position:absolute; top:44%; left:50%; transform:translate(-50%, -50%); display:none; background:#833988; color:#fff; border:none; font-family:'Courier New',monospace; font-size:1em; font-weight:bold; padding:12px 24px; border-radius:30px; cursor:pointer; box-shadow:0 4px 10px rgba(131,57,136,0.3); z-index:5; width:80%; max-width:280px; text-align:center; }
   #btn-trigger-instructions.visible { display:block; }
   #btn-trigger-instructions:active { background:#5a2060; }
@@ -34,26 +33,38 @@
   #btn-shoot { width:96px; height:96px; font-size:1.8em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
   
+  /* Paneles flotantes sobre el juego */
   .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; z-index:10; }
   .overlay-panel.visible { display:flex; }
-  #instructions-panel h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:4px; }
-  #instructions-panel p { color:#111; font-size:.82em; line-height:1.7; max-width:320px; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:14px; background:rgba(162,180,104,0.1); }
+  
+  /* CORRECCIÓN: Estilos optimizados y con scroll para las instrucciones */
+  #instructions-panel { justify-content: flex-start; padding: 16px; }
+  #instructions-inner { width: 100%; max-height: 85%; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  
+  /* Personalización de la barrita de scroll para que quede bonita */
+  #instructions-inner::-webkit-scrollbar { width: 6px; }
+  #instructions-inner::-webkit-scrollbar-track { background: rgba(162,180,104,0.1); border-radius: 4px; }
+  #instructions-inner::-webkit-scrollbar-thumb { background: #a2b468; border-radius: 4px; }
+
+  #instructions-panel h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:2px; }
+  #instructions-panel p { color:#111; font-size:.82em; line-height:1.6; width:100%; max-width:320px; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:12px; background:rgba(162,180,104,0.08); }
+  
   #defenestration-panel h2 { color:#833988; font-size:1.1em; text-align:center; line-height:1.5; }
   #defenestration-panel .lives-left { color:#a2b468; font-size:1em; font-weight:bold; }
   #gameover-panel h2 { color:#833988; font-size:1.2em; text-align:center; }
   #gameover-panel .score-final { color:#a2b468; font-size:1.1em; font-weight:bold; }
   #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:1em; padding:8px 14px; border-radius:4px; text-align:center; width:200px; outline:none; }
   #name-input::placeholder { color:#aaa; }
-  #ranking { width:100%; max-width:280px; overflow-y:auto; max-height:150px; }
+  #ranking { width:100%; max-width:280px; overflow-y:auto; max-height:130px; }
   #ranking h3 { color:#833988; font-size:.95em; margin-bottom:6px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:4px; }
   #ranking-list { list-style:none; width:100%; }
   #ranking-list li { display:flex; justify-content:space-between; font-size:.85em; padding:3px 0; border-bottom:1px solid #a2b46844; color:#111; }
-  #ranking-list li:first-child { color:#833988; font-weight:bold; }
+  #ranking-list li :first-child { color:#833988; font-weight:bold; }
   #ranking-list li .pos { color:#a2b468; width:20px; font-weight:bold; }
   #ranking-list li .name { flex:1; padding-left:6px; }
   #ranking-list li .pts { color:#833988; font-weight:bold; }
   #saved-msg { color:#a2b468; font-size:.85em; min-height:1em; font-weight:bold; }
-  .action-btn { font-family:'Courier New',monospace; font-size:1em; cursor:pointer; padding:9px 24px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; }
+  .action-btn { font-family:'Courier New',monospace; font-size:1em; cursor:pointer; padding:9px 24px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; flex-shrink:0; }
   .btn-purple { background:#833988; color:#fff; }
   .btn-purple:active { background:#5a2060; }
   .btn-green { background:#a2b468; color:#fff; }
@@ -78,10 +89,12 @@
   <button id="btn-trigger-instructions" class="visible">📜 Cómo jugar</button>
 
   <div class="overlay-panel" id="instructions-panel">
-    <h2>📜 Cómo jugar</h2>
-    <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
-    Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
-    Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
+    <div id="instructions-inner">
+      <h2>📜 Cómo jugar</h2>
+      <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
+      Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
+      Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
+    </div>
     <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
   </div>
   
@@ -251,8 +264,7 @@ function cleanControls() {
 restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; htmlInstrBtn.classList.add('visible'); });
 continueBtn.addEventListener('click', () => { cleanControls(); defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
 
-// Eventos del botón de instrucciones unificados e infalibles
-htmlInstrBtn.addEventListener('click', () => { ensureAudio(); instrPanel.classList.add('visible'); });
+htmlInstrBtn.addEventListener('click', () => { ensureAudio(); instrPanel.classList.add('visible'); document.getElementById('instructions-inner').scrollTop = 0; });
 closeInstrBtn.addEventListener('click', () => { cleanControls(); instrPanel.classList.remove('visible'); });
 
 function showDefenestration() {

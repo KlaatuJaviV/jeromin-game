@@ -432,15 +432,34 @@ function setupBtn(id,key){
 setupBtn('btn-left','left'); setupBtn('btn-right','right'); setupBtn('btn-shoot','shoot');
 
 const keys={};
-document.addEventListener('keydown',e=>{
+document.addEventListener('keydown', async e=>{ // Añadido 'async' para el refresco del ranking
   if(e.key==='ArrowLeft'){keys['left']=true;e.preventDefault();ensureAudio();}
   if(e.key==='ArrowRight'){keys['right']=true;e.preventDefault();ensureAudio();}
-  if(e.key==='Enter'){keys['shoot']=true;e.preventDefault();ensureAudio();}
-});
-document.addEventListener('keyup',e=>{
-  if(e.key==='ArrowLeft') keys['left']=false;
-  if(e.key==='ArrowRight') keys['right']=false;
-  if(e.key==='Enter') keys['shoot']=false;
+  
+  if(e.key==='Enter'){
+    keys['shoot']=true;
+    e.preventDefault();
+    ensureAudio();
+
+    // INTERCEPCIÓN DE ENTER SEGÚN EL ESTADO DEL JUEGO
+    
+    // Case 1: Si está en la pantalla de defenestración (perdió una vida), ENTER equivale a "Continuar"
+    if (state === 'defenestration') {
+      defPanel.classList.remove('visible'); 
+      oliver.invincible = 120; 
+      state = 'playing';
+      return;
+    }
+    
+    // Case 2: Si está en GameOver pero el botón de guardar está desactivado (porque ya guardó o está guardando), 
+    // ENTER equivale a "¡Jugar de nuevo!"
+    if (state === 'gameover' && saveBtn.disabled) {
+      goPanel.classList.remove('visible'); 
+      resetGame(); 
+      state = 'waiting';
+      return;
+    }
+  }
 });
 
 function startGame(){ resetGame(); state='playing'; }

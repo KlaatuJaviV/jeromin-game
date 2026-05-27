@@ -51,13 +51,18 @@
     justify-content:center;
     flex-grow:1; 
     width:100%;
-    min-height:0; /* Permite al contenedor encogerse si el espacio es crítico */
+    min-height:0;
   }
   canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); }
   
-  #btn-trigger-instructions { position:absolute; top:44%; left:50%; transform:translate(-50%, -50%); display:none; background:#833988; color:#fff; border:none; font-family:'Courier New',monospace; font-size:0.9em; font-weight:bold; padding:10px 20px; border-radius:30px; cursor:pointer; box-shadow:0 4px 10px rgba(131,57,136,0.3); z-index:5; width:75%; max-width:240px; text-align:center; }
+  /* Botones del menú inicial */
+  #btn-trigger-instructions { position:absolute; top:40%; left:50%; transform:translate(-50%, -50%); display:none; background:#833988; color:#fff; border:none; font-family:'Courier New',monospace; font-size:0.9em; font-weight:bold; padding:10px 20px; border-radius:30px; cursor:pointer; box-shadow:0 4px 10px rgba(131,57,136,0.3); z-index:5; width:75%; max-width:240px; text-align:center; }
   #btn-trigger-instructions.visible { display:block; }
   #btn-trigger-instructions:active { background:#5a2060; }
+
+  #btn-trigger-ranking { position:absolute; top:51%; left:50%; transform:translate(-50%, -50%); display:none; background:#a2b468; color:#fff; border:none; font-family:'Courier New',monospace; font-size:0.9em; font-weight:bold; padding:10px 20px; border-radius:30px; cursor:pointer; box-shadow:0 4px 10px rgba(162,180,104,0.3); z-index:5; width:75%; max-width:240px; text-align:center; }
+  #btn-trigger-ranking.visible { display:block; }
+  #btn-trigger-ranking:active { background:#728040; }
 
   /* ZONA INFERIOR: Botonera adaptativa anclada abajo */
   #controls { 
@@ -71,7 +76,6 @@
   }
   .dir-group { display:flex; gap:6px; }
   
-  /* Botones calculados con alturas dinámicas máx para que no empujen hacia arriba */
   .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:1.8em; width:76px; height:76px; max-width:18vw; max-height:18vw; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
   .btn:active { background:rgba(162,180,104,0.55); }
   #btn-shoot { width:86px; height:86px; max-width:21vw; max-height:21vw; font-size:1.6em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
@@ -81,19 +85,24 @@
   .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px; z-index:10; }
   .overlay-panel.visible { display:flex; }
 
-  /* Modal Flotante de Instrucciones (Indestructible) */
-  #instructions-panel { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; padding:20px; }
-  #instructions-panel.visible { display:flex; }
-  #instructions-card { background:#f7f4ee; border:3px solid #833988; border-radius:12px; width:100%; max-width:340px; max-height:75dvh; display:flex; flex-direction:column; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
-  #instructions-inner { width: 100%; overflow-y: auto; padding-right: 4px; margin-bottom: 12px; }
+  /* Modales Flotantes (Instrucciones y Ranking General) */
+  #instructions-panel, #ranking-panel { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; padding:20px; }
+  #instructions-panel.visible, #ranking-panel.visible { display:flex; }
   
-  /* Scrollbars visuales */
-  #instructions-inner::-webkit-scrollbar, #ranking::-webkit-scrollbar { width: 5px; }
-  #instructions-inner::-webkit-scrollbar-track, #ranking::-webkit-scrollbar-track { background: rgba(162,180,104,0.05); border-radius: 4px; }
-  #instructions-inner::-webkit-scrollbar-thumb, #ranking::-webkit-scrollbar-thumb { background: #a2b468; border-radius: 4px; }
+  .modal-card { position:relative; background:#f7f4ee; border:3px solid #833988; border-radius:12px; width:100%; max-width:340px; max-height:75dvh; display:flex; flex-direction:column; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+  .modal-inner { width: 100%; overflow-y: auto; padding-right: 4px; margin-bottom: 12px; }
+  
+  /* Botón X de cierre elegante */
+  .close-x-btn { position:absolute; top:10px; right:12px; background:none; border:none; color:#833988; font-size:1.4em; font-weight:bold; cursor:pointer; padding:4px; line-height:1; font-family:monospace; z-index:10; }
+  .close-x-btn:active { color:#5a2060; transform:scale(0.9); }
 
-  #instructions-panel h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:10px; flex-shrink:0; }
-  #instructions-panel p { color:#111; font-size:.8em; line-height:1.5; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:10px; background:rgba(162,180,104,0.06); }
+  /* Scrollbars visuales */
+  .modal-inner::-webkit-scrollbar, #ranking::-webkit-scrollbar, #main-ranking-container::-webkit-scrollbar { width: 5px; }
+  .modal-inner::-webkit-scrollbar-track, #ranking::-webkit-scrollbar-track, #main-ranking-container::-webkit-scrollbar-track { background: rgba(162,180,104,0.05); border-radius: 4px; }
+  .modal-inner::-webkit-scrollbar-thumb, #ranking::-webkit-scrollbar-thumb, #main-ranking-container::-webkit-scrollbar-thumb { background: #a2b468; border-radius: 4px; }
+
+  .modal-card h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:12px; padding-right:20px; flex-shrink:0; }
+  .modal-card p { color:#111; font-size:.8em; line-height:1.5; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:10px; background:rgba(162,180,104,0.06); }
   
   #defenestration-panel h2 { color:#833988; font-size:1em; text-align:center; line-height:1.4; }
   #defenestration-panel .lives-left { color:#a2b468; font-size:0.9em; font-weight:bold; }
@@ -103,14 +112,18 @@
   #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:0.85em; padding:5px 10px; border-radius:4px; text-align:center; width:170px; outline:none; }
   #name-input::placeholder { color:#aaa; }
   
-  #ranking { width:100%; max-width:240px; overflow-y:auto; max-height:95px; border: 1.5px solid rgba(162,180,104,0.3); border-radius: 6px; padding: 4px 6px; background: rgba(255,255,255,0.3); }
-  #ranking h3 { color:#833988; font-size:.8em; margin-bottom:2px; text-align:center; border-bottom:1.5px solid #a2b468; padding-bottom:2px; position: sticky; top: 0; background: #f7f4ee; }
-  #ranking-list { list-style:none; width:100%; }
-  #ranking-list li { display:flex; justify-content:space-between; font-size:.75em; padding:2px 0; border-bottom:1px solid #a2b46811; color:#111; }
-  #ranking-list li:first-child { color:#833988; font-weight:bold; }
-  #ranking-list li .pos { color:#a2b468; width:16px; font-weight:bold; }
-  #ranking-list li .name { flex:1; padding-left:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align: left; }
-  #ranking-list li .pts { color:#833988; font-weight:bold; }
+  #ranking, #main-ranking-container { width:100%; max-width:240px; overflow-y:auto; max-height:95px; border: 1.5px solid rgba(162,180,104,0.3); border-radius: 6px; padding: 4px 6px; background: rgba(255,255,255,0.3); margin: 0 auto; }
+  #main-ranking-container { max-height: 200px; background: #fff; border-color: #a2b468; width: 100%; max-width: 100%; }
+  
+  .ranking-header { color:#833988; font-size:.8em; margin-bottom:2px; text-align:center; border-bottom:1.5px solid #a2b468; padding-bottom:2px; position: sticky; top: 0; background: #f7f4ee; font-weight: bold; }
+  #main-ranking-container .ranking-header { background: #fff; font-size: 0.9em; padding-bottom: 4px; }
+
+  .ranking-list { list-style:none; width:100%; }
+  .ranking-list li { display:flex; justify-content:space-between; font-size:.75em; padding:4px 0; border-bottom:1px solid #a2b46811; color:#111; }
+  .ranking-list li:first-child { color:#833988; font-weight:bold; }
+  .ranking-list li .pos { color:#a2b468; width:22px; font-weight:bold; }
+  .ranking-list li .name { flex:1; padding-left:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align: left; }
+  .ranking-list li .pts { color:#833988; font-weight:bold; }
   
   #saved-msg { color:#a2b468; font-size:.75em; min-height:1.1em; font-weight:bold; }
   .action-btn { font-family:'Courier New',monospace; font-size:0.9em; cursor:pointer; padding:6px 18px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.01em; flex-shrink:0; text-align:center; }
@@ -138,6 +151,7 @@
   <canvas id="c"></canvas>
   
   <button id="btn-trigger-instructions" class="visible">📜 Cómo jugar</button>
+  <button id="btn-trigger-ranking" class="visible">🏆 Ver Ranking</button>
   
   <div class="overlay-panel" id="defenestration-panel">
     <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
@@ -151,20 +165,35 @@
     <input id="name-input" type="text" maxlength="16" placeholder="Tu nombre aquí" autocomplete="off"/>
     <div id="saved-msg"></div>
     <button class="action-btn btn-green" id="save-btn">💾 Guardar puntuación</button>
-    <div id="ranking"><h3>🏆 Ranking</h3><ul id="ranking-list"></ul></div>
+    <div id="ranking"><div class="ranking-header">🏆 Ranking</div><ul id="ranking-list" class="ranking-list"></ul></div>
     <button class="action-btn btn-purple" id="restart-btn" aria-label="¡Empieza de nuevo!">🥄 ¡Jugar de nuevo!</button>
   </div>
 </div>
 
 <div id="instructions-panel">
-  <div id="instructions-card">
+  <div class="modal-card">
+    <button class="close-x-btn" id="close-instructions-x" aria-label="Cerrar">×</button>
     <h2>📜 Cómo jugar</h2>
-    <div id="instructions-inner">
+    <div class="modal-inner" id="instructions-inner">
       <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
       Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
       Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
     </div>
     <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
+  </div>
+</div>
+
+<div id="ranking-panel">
+  <div class="modal-card">
+    <button class="close-x-btn" id="close-ranking-x" aria-label="Cerrar">×</button>
+    <h2>🏆 Clasificación Global</h2>
+    <div class="modal-inner">
+      <div id="main-ranking-container">
+        <div class="ranking-header">Top 10 Mundial</div>
+        <ul id="main-ranking-list" class="ranking-list"></ul>
+      </div>
+    </div>
+    <button class="action-btn btn-green" id="close-ranking-btn">🥄 VOLVER</button>
   </div>
 </div>
 
@@ -270,19 +299,33 @@ async function loadRankings() {
 
 function renderRanking() {
   const rl = document.getElementById('ranking-list'); rl.innerHTML = '';
-  if (!rankings.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468; text-align:center;">Sin marcas aún</span></li>'; return; }
+  const mrl = document.getElementById('main-ranking-list'); mrl.innerHTML = '';
   
-  const visualTop = rankings.slice(0, 5);
-  visualTop.forEach((e,i) => { 
+  if (!rankings.length) { 
+    const emptyLi = '<li><span class="name" style="color:#a2b468; text-align:center;">Sin marcas aún</span></li>';
+    rl.innerHTML = emptyLi; mrl.innerHTML = emptyLi;
+    return; 
+  }
+  
+  // Render de la minilista final del juego (Top 5)
+  rankings.slice(0, 5).forEach((e,i) => { 
     const li = document.createElement('li'); 
     li.innerHTML = `<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; 
     rl.appendChild(li); 
+  });
+
+  // Render del panel principal completo (Top 10)
+  rankings.forEach((e,i) => { 
+    const li = document.createElement('li'); 
+    li.innerHTML = `<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; 
+    mrl.appendChild(li); 
   });
 }
 
 const goPanel      = document.getElementById('gameover-panel');
 const defPanel     = document.getElementById('defenestration-panel');
 const instrPanel   = document.getElementById('instructions-panel');
+const rnkPanel     = document.getElementById('ranking-panel');
 const saveBtn      = document.getElementById('save-btn');
 const restartBtn   = document.getElementById('restart-btn');
 const savedMsg     = document.getElementById('saved-msg');
@@ -290,7 +333,11 @@ const scoreFinal   = document.getElementById('score-final');
 const livesLeftMsg = document.getElementById('lives-left-msg');
 const continueBtn  = document.getElementById('continue-btn');
 const closeInstrBtn= document.getElementById('close-instructions-btn');
+const closeInstrX  = document.getElementById('close-instructions-x');
 const htmlInstrBtn = document.getElementById('btn-trigger-instructions');
+const htmlRnkBtn   = document.getElementById('btn-trigger-ranking');
+const closeRnkBtn  = document.getElementById('close-ranking-btn');
+const closeRnkX    = document.getElementById('close-ranking-x');
 
 saveBtn.addEventListener('click', async () => {
   const name = document.getElementById('name-input').value.trim() || 'Anónimo';
@@ -331,11 +378,26 @@ function cleanControls() {
   keys['left'] = false; keys['right'] = false; keys['shoot'] = false;
 }
 
-restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; htmlInstrBtn.classList.add('visible'); });
+restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; htmlInstrBtn.classList.add('visible'); htmlRnkBtn.classList.add('visible'); });
 continueBtn.addEventListener('click', () => { cleanControls(); defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
 
+// Lógica de apertura y cierres de Instrucciones
 htmlInstrBtn.addEventListener('click', () => { ensureAudio(); instrPanel.classList.add('visible'); document.getElementById('instructions-inner').scrollTop = 0; });
-closeInstrBtn.addEventListener('click', () => { cleanControls(); instrPanel.classList.remove('visible'); });
+const hideInstructions = () => { cleanControls(); instrPanel.classList.remove('visible'); };
+closeInstrBtn.addEventListener('click', hideInstructions);
+closeInstrX.addEventListener('click', hideInstructions);
+
+// Lógica de apertura y cierres de Ranking Principal
+htmlRnkBtn.addEventListener('click', async () => { 
+  ensureAudio(); 
+  rnkPanel.classList.add('visible'); 
+  document.getElementById('main-ranking-list').innerHTML = '<li><span class="name" style="color:#833988; text-align:center;">Cargando...</span></li>';
+  await loadRankings(); 
+  renderRanking(); 
+});
+const hideRankingModal = () => { cleanControls(); rnkPanel.classList.remove('visible'); };
+closeRnkBtn.addEventListener('click', hideRankingModal);
+closeRnkX.addEventListener('click', hideRankingModal);
 
 function showDefenestration() {
   livesLeftMsg.textContent = lives===1 ? '⚠️ ¡Solo te queda 1 vida!' : 'Te quedan '+lives+' vidas';
@@ -354,16 +416,12 @@ async function showGameOver() {
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
 
-// ESCALADO MATEMÁTICO INTEGRAL: El Canvas calcula el espacio exacto disponible entre el HUD y la botonera
 function resize() {
   const maxW = Math.min(window.innerWidth - 8, 500);
-  
-  // Calculamos el alto del contenedor central restando la cabecera y el panel de control
   const headerH = document.getElementById('header-container').offsetHeight;
   const controlsH = document.getElementById('controls').offsetHeight;
-  const availH = window.innerHeight - headerH - controlsH - 16; // Margen de seguridad extra
+  const availH = window.innerHeight - headerH - controlsH - 16;
   
-  // Ajustamos manteniendo la relación de aspecto 1 : 1.1
   const h = Math.min(availH, maxW * 1.1);
   const w = Math.min(maxW, h / 1.1);
   
@@ -376,7 +434,6 @@ function resize() {
   resetPositions();
 }
 window.addEventListener('resize', resize);
-// Ejecutamos también un observador cuando cambie el tamaño del header por carga diferida de imágenes
 new ResizeObserver(resize).observe(document.getElementById('header-container'));
 
 const W  = () => canvas.width,  H  = () => canvas.height;
@@ -513,12 +570,12 @@ function drawStartScreen() {
   drawBg(); drawJeromin(oliver.x,oliver.y,0);
   ctx.textAlign='center';
   ctx.font='bold '+Math.floor(W()*.042)+'px Courier New'; ctx.fillStyle='#833988';
-  ctx.fillText('¡Por favor, juega de nuevo!',W()/2,H()*.26);
+  ctx.fillText('¡Por favor, juega de nuevo!',W()/2,H()*.22);
   ctx.font=Math.floor(W()*.032)+'px Courier New'; ctx.fillStyle='#a2b468';
-  ctx.fillText('¡Quiero más lentejas!',W()/2,H()*.26+W()*.052);
+  ctx.fillText('¡Quiero más lentejas!',W()/2,H()*.22+W()*.052);
   
   ctx.font=Math.floor(W()*.026)+'px Courier New'; ctx.fillStyle='#555';
-  ctx.fillText('Toca 🥄 o pulsa la tecla ENTER para comenzar',W()/2,H()*.62);
+  ctx.fillText('Toca 🥄 o pulsa la tecla ENTER para comenzar',W()/2,H()*.66);
 }
 
 function overlaps(ax,ay,aw,ah,bx,by,bw,bh){return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;}
@@ -560,6 +617,7 @@ document.addEventListener('keydown', e => {
       resetGame(); 
       state = 'waiting';
       htmlInstrBtn.classList.add('visible');
+      htmlRnkBtn.classList.add('visible');
       return;
     }
 
@@ -578,7 +636,7 @@ document.addEventListener('keyup',e=>{
   if(e.key==='Enter') keys['shoot']=false;
 });
 
-function startGame(){ resetGame(); state='playing'; htmlInstrBtn.classList.remove('visible'); }
+function startGame(){ resetGame(); state='playing'; htmlInstrBtn.classList.remove('visible'); htmlRnkBtn.classList.remove('visible'); }
 
 function gameLoop(){
   requestAnimationFrame(gameLoop);

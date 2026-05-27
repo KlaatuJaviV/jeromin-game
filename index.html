@@ -229,9 +229,15 @@ saveBtn.addEventListener('click', async () => {
   }
 });
 
-restartBtn.addEventListener('click', () => { goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; });
-continueBtn.addEventListener('click', () => { defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
-closeInstrBtn.addEventListener('click', () => { instrPanel.classList.remove('visible'); });
+// MODIFICADO: Al cambiar de pantallas limpiamos el objeto global de control para evitar atascos de dirección
+function cleanControls() {
+  btns.left = false; btns.right = false; btns.shoot = false;
+  keys['left'] = false; keys['right'] = false; keys['shoot'] = false;
+}
+
+restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; });
+continueBtn.addEventListener('click', () => { cleanControls(); defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
+closeInstrBtn.addEventListener('click', () => { cleanControls(); instrPanel.classList.remove('visible'); });
 
 function showDefenestration() {
   livesLeftMsg.textContent = lives===1 ? '⚠️ ¡Solo te queda 1 vida!' : 'Te quedan '+lives+' vidas';
@@ -419,16 +425,20 @@ function handleCanvasTap(cx,cy){
 canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleCanvasTap((e.clientX-r.left)*(W()/r.width),(e.clientY-r.top)*(H()/r.height));});
 canvas.addEventListener('touchend',e=>{const r=canvas.getBoundingClientRect(),t=e.changedTouches[0];handleCanvasTap((t.clientX-r.left)*(W()/r.width),(t.clientY-r.top)*(H()/r.height));},{passive:true});
 
+// MODIFICADO: Corregidos listeners táctiles de la pantalla para evitar que 'btns' se atasque
 function setupBtn(id,key){
   const el=document.getElementById(id);
   const on=e=>{e.preventDefault();btns[key]=true;ensureAudio();};
   const off=e=>{e.preventDefault();btns[key]=false;};
-  el.addEventListener('touchstart',on,{passive:false}); el.addEventListener('touchend',off,{passive:false}); el.addEventListener('touchcancel',off,{passive:false});
-  el.addEventListener('mousedown',on); el.addEventListener('mouseup',off); el.addEventListener('mouseleave',off);
+  el.addEventListener('touchstart',on,{passive:false}); 
+  el.addEventListener('touchend',off,{passive:false}); 
+  el.addEventListener('touchcancel',off,{passive:false});
+  el.addEventListener('mousedown',on); 
+  el.addEventListener('mouseup',off); 
+  el.addEventListener('mouseleave',off);
 }
 setupBtn('btn-left','left'); setupBtn('btn-right','right'); setupBtn('btn-shoot','shoot');
 
-// MODIFICADO: Sistema unificado de eventos de teclado que intercepta ENTER según la pantalla activa
 const keys={};
 document.addEventListener('keydown', e => {
   if(e.key==='ArrowLeft'){keys['left']=true;e.preventDefault();ensureAudio();}
@@ -437,35 +447,34 @@ document.addEventListener('keydown', e => {
   if(e.key==='Enter'){
     ensureAudio();
     
-    // Si estamos en defenestración, ENTER quita el panel y sigue jugando
     if (state === 'defenestration') {
       e.preventDefault();
+      cleanControls();
       defPanel.classList.remove('visible'); 
       oliver.invincible = 120; 
       state = 'playing';
       return;
     }
     
-    // Si estamos en GameOver y el botón de guardar ya fue pulsado o está deshabilitado, ENTER reinicia la partida
     if (state === 'gameover' && saveBtn.disabled) {
       e.preventDefault();
+      cleanControls();
       goPanel.classList.remove('visible'); 
       resetGame(); 
       state = 'waiting';
       return;
     }
 
-    // Si estamos en GameOver pero el input tiene el foco, dejamos que el comportamiento nativo actúe (escribir el nombre)
     if (state === 'gameover' && document.activeElement === document.getElementById('name-input')) {
       return; 
     }
     
-    // En cualquier otro caso normal de juego, ENTER mapea el disparo de cucharas
     keys['shoot']=true;
     e.preventDefault();
   }
 });
 
+// MODIFICADO: keyup ahora limpia correctamente la entrada del teclado sin congelar el estado
 document.addEventListener('keyup',e=>{
   if(e.key==='ArrowLeft') keys['left']=false;
   if(e.key==='ArrowRight') keys['right']=false;
@@ -484,7 +493,6 @@ function gameLoop(){
 
   if(state==='waiting'){drawStartScreen();if(shootTap)startGame();return;}
   
-  // MODIFICADO: Permitir que el bucle dibuje el estado congelado de fondo para que las pantallas capturen las teclas de forma continua
   if(state==='defenestration' || state==='gameover') {
     drawBg();
     enemies.forEach(e=>e.type==='lenteja'?drawLenteja(e.x,e.y):drawSaco(e.x,e.y));

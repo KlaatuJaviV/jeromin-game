@@ -16,8 +16,15 @@
   #lives-display img { width:28px; height:28px; object-fit:contain; }
   #score-span { color:#833988; font-weight:bold; }
   #level-span { color:#a2b468; font-weight:bold; }
+  
+  #game-container { position:relative; display:block; }
   canvas { display:block; border:3px solid #833988; background:#f7f4ee; box-shadow:0 0 16px rgba(131,57,136,0.2); }
   
+  /* Botón HTML nativo sobre el canvas en la pantalla de inicio */
+  #btn-trigger-instructions { position:absolute; top:44%; left:50%; transform:translate(-50%, -50%); display:none; background:#833988; color:#fff; border:none; font-family:'Courier New',monospace; font-size:1em; font-weight:bold; padding:12px 24px; border-radius:30px; cursor:pointer; box-shadow:0 4px 10px rgba(131,57,136,0.3); z-index:5; width:80%; max-width:280px; text-align:center; }
+  #btn-trigger-instructions.visible { display:block; }
+  #btn-trigger-instructions:active { background:#5a2060; }
+
   #controls { display:flex; align-items:center; justify-content:space-between; width:100%; padding:8px 16px; gap:10px; margin-top:6px; }
   
   .dir-group { display:flex; gap:6px; }
@@ -26,7 +33,8 @@
   .btn:active { background:rgba(162,180,104,0.55); }
   #btn-shoot { width:96px; height:96px; font-size:1.8em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
-  .overlay-panel { display:none; position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; overflow-y:auto; }
+  
+  .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; z-index:10; }
   .overlay-panel.visible { display:flex; }
   #instructions-panel h2 { color:#833988; font-size:1.1em; text-align:center; margin-bottom:4px; }
   #instructions-panel p { color:#111; font-size:.82em; line-height:1.7; max-width:320px; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:14px; background:rgba(162,180,104,0.1); }
@@ -36,7 +44,7 @@
   #gameover-panel .score-final { color:#a2b468; font-size:1.1em; font-weight:bold; }
   #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:1em; padding:8px 14px; border-radius:4px; text-align:center; width:200px; outline:none; }
   #name-input::placeholder { color:#aaa; }
-  #ranking { width:100%; max-width:280px; }
+  #ranking { width:100%; max-width:280px; overflow-y:auto; max-height:150px; }
   #ranking h3 { color:#833988; font-size:.95em; margin-bottom:6px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:4px; }
   #ranking-list { list-style:none; width:100%; }
   #ranking-list li { display:flex; justify-content:space-between; font-size:.85em; padding:3px 0; border-bottom:1px solid #a2b46844; color:#111; }
@@ -64,8 +72,11 @@
   <span id="level-span">Nivel: 1</span>
 </div>
 
-<div id="game-wrap" style="position:relative">
+<div id="game-container">
   <canvas id="c"></canvas>
+  
+  <button id="btn-trigger-instructions" class="visible">📜 Cómo jugar</button>
+
   <div class="overlay-panel" id="instructions-panel">
     <h2>📜 Cómo jugar</h2>
     <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
@@ -73,11 +84,13 @@
     Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
     <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
   </div>
+  
   <div class="overlay-panel" id="defenestration-panel">
     <h2>👜💥<br>¡No, el saco de gravilla<br>ha defenestrado a Jeromín!</h2>
     <div class="lives-left" id="lives-left-msg"></div>
     <button class="action-btn btn-green" id="continue-btn">😤 Continuar</button>
   </div>
+  
   <div class="overlay-panel" id="gameover-panel">
     <h2>💀 ¡Jeromín ha muerto<br>de indigestión! 💀</h2>
     <div class="score-final" id="score-final">Puntuación: 0</div>
@@ -205,6 +218,7 @@ const scoreFinal   = document.getElementById('score-final');
 const livesLeftMsg = document.getElementById('lives-left-msg');
 const continueBtn  = document.getElementById('continue-btn');
 const closeInstrBtn= document.getElementById('close-instructions-btn');
+const htmlInstrBtn = document.getElementById('btn-trigger-instructions');
 
 saveBtn.addEventListener('click', async () => {
   const name = document.getElementById('name-input').value.trim() || 'Anónimo';
@@ -229,14 +243,16 @@ saveBtn.addEventListener('click', async () => {
   }
 });
 
-// MODIFICADO: Al cambiar de pantallas limpiamos el objeto global de control para evitar atascos de dirección
 function cleanControls() {
   btns.left = false; btns.right = false; btns.shoot = false;
   keys['left'] = false; keys['right'] = false; keys['shoot'] = false;
 }
 
-restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; });
+restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; htmlInstrBtn.classList.add('visible'); });
 continueBtn.addEventListener('click', () => { cleanControls(); defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
+
+// Eventos del botón de instrucciones unificados e infalibles
+htmlInstrBtn.addEventListener('click', () => { ensureAudio(); instrPanel.classList.add('visible'); });
 closeInstrBtn.addEventListener('click', () => { cleanControls(); instrPanel.classList.remove('visible'); });
 
 function showDefenestration() {
@@ -263,6 +279,8 @@ function resize() {
   canvas.width = Math.floor(w); canvas.height = Math.floor(w*1.1);
   document.getElementById('controls').style.maxWidth = canvas.width+'px';
   document.getElementById('banner-wrap').style.maxWidth = canvas.width+'px';
+  document.getElementById('game-container').style.width = canvas.width+'px';
+  document.getElementById('game-container').style.height = canvas.height+'px';
   resetPositions();
 }
 window.addEventListener('resize', resize);
@@ -397,35 +415,20 @@ function drawInGameScore() {
   ctx.restore();
 }
 
-function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x+r,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
-
 function drawStartScreen() {
   drawBg(); drawJeromin(oliver.x,oliver.y,0);
   ctx.textAlign='center';
   ctx.font='bold '+Math.floor(W()*.042)+'px Courier New'; ctx.fillStyle='#833988';
-  ctx.fillText('¡Por favor, juega de nuevo!',W()/2,H()*.3);
+  ctx.fillText('¡Por favor, juega de nuevo!',W()/2,H()*.26);
   ctx.font=Math.floor(W()*.032)+'px Courier New'; ctx.fillStyle='#a2b468';
-  ctx.fillText('¡Quiero más lentejas!',W()/2,H()*.3+W()*.052);
-  const bw=Math.floor(W()*.72),bh=Math.floor(H()*.072),bx=W()/2-bw/2,by=H()*.44;
-  ctx.fillStyle='#833988'; roundRect(ctx,bx,by,bw,bh,bh/2); ctx.fill();
-  ctx.font='bold '+Math.floor(W()*.027)+'px Courier New'; ctx.fillStyle='#fff';
-  ctx.fillText('📜 Instrucciones para jugar',W()/2,by+bh*.65);
+  ctx.fillText('¡Quiero más lentejas!',W()/2,H()*.26+W()*.052);
+  
   ctx.font=Math.floor(W()*.026)+'px Courier New'; ctx.fillStyle='#555';
   ctx.fillText('Toca 🥄 o pulsa la tecla ENTER para comenzar',W()/2,H()*.62);
-  canvas._instrBtn={x:bx,y:by,w:bw,h:bh};
 }
 
 function overlaps(ax,ay,aw,ah,bx,by,bw,bh){return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;}
 
-function handleCanvasTap(cx,cy){
-  if (state!=='waiting') return;
-  const b=canvas._instrBtn;
-  if (b&&cx>=b.x&&cx<=b.x+b.w&&cy>=b.y&&cy<=b.y+b.h) instrPanel.classList.add('visible');
-}
-canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect();handleCanvasTap((e.clientX-r.left)*(W()/r.width),(e.clientY-r.top)*(H()/r.height));});
-canvas.addEventListener('touchend',e=>{const r=canvas.getBoundingClientRect(),t=e.changedTouches[0];handleCanvasTap((t.clientX-r.left)*(W()/r.width),(t.clientY-r.top)*(H()/r.height));},{passive:true});
-
-// MODIFICADO: Corregidos listeners táctiles de la pantalla para evitar que 'btns' se atasque
 function setupBtn(id,key){
   const el=document.getElementById(id);
   const on=e=>{e.preventDefault();btns[key]=true;ensureAudio();};
@@ -462,6 +465,7 @@ document.addEventListener('keydown', e => {
       goPanel.classList.remove('visible'); 
       resetGame(); 
       state = 'waiting';
+      htmlInstrBtn.classList.add('visible');
       return;
     }
 
@@ -474,14 +478,13 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// MODIFICADO: keyup ahora limpia correctamente la entrada del teclado sin congelar el estado
 document.addEventListener('keyup',e=>{
   if(e.key==='ArrowLeft') keys['left']=false;
   if(e.key==='ArrowRight') keys['right']=false;
   if(e.key==='Enter') keys['shoot']=false;
 });
 
-function startGame(){ resetGame(); state='playing'; }
+function startGame(){ resetGame(); state='playing'; htmlInstrBtn.classList.remove('visible'); }
 
 function gameLoop(){
   requestAnimationFrame(gameLoop);

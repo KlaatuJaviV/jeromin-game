@@ -23,7 +23,7 @@
     padding: 8px 4px;
   }
 
-  /* ZONA SUPERIOR: Compacta y flexible */
+  /* ZONA SUPERIOR */
   #header-container {
     width:100%;
     display:flex;
@@ -43,7 +43,7 @@
   #score-span { color:#833988; font-weight:bold; }
   #level-span { color:#a2b468; font-weight:bold; }
   
-  /* ZONA CENTRAL: El contenedor del juego se estira en el espacio sobrante */
+  /* ZONA CENTRAL */
   #game-container { 
     position:relative; 
     display:flex;
@@ -64,35 +64,68 @@
   #btn-trigger-ranking.visible { display:block; }
   #btn-trigger-ranking:active { background:#728040; }
 
-  /* ZONA INFERIOR: Botonera adaptativa anclada abajo */
+  /* ZONA INFERIOR: BOTONERA Y JOYSTICK */
   #controls { 
     display:flex; 
     align-items:center; 
     justify-content:space-between; 
     width:100%; 
-    padding:4px 8px; 
+    padding:4px 12px; 
     gap:10px; 
     flex-shrink:0;
+    height: 100px;
   }
-  .dir-group { display:flex; gap:6px; }
   
-  .btn { background:rgba(162,180,104,0.22); border:2.5px solid #a2b468; border-radius:50%; color:#a2b468; font-size:1.8em; width:76px; height:76px; max-width:18vw; max-height:18vw; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
-  .btn:active { background:rgba(162,180,104,0.55); }
-  #btn-shoot { width:86px; height:86px; max-width:21vw; max-height:21vw; font-size:1.6em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
+  /* Botón Disparo Izquierdo */
+  #btn-shoot { width:86px; height:86px; max-width:21vw; max-height:21vw; font-size:1.6em; border:2.5px solid #833988; border-radius:50%; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; display:flex; align-items:center; justify-content:center; user-select:none; -webkit-user-select:none; cursor:pointer; flex-shrink:0; font-weight:bold; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
+
+  /* Contenedor del Joystick Táctil en el lado derecho */
+  #joystick-zone {
+    width: 110px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #joystick-base {
+    width: 76px;
+    height: 76px;
+    max-width: 18vw;
+    max-height: 18vw;
+    border: 2.5px solid #a2b468;
+    border-radius: 50%;
+    background: rgba(162,180,104,0.15);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #joystick-knob {
+    width: 36px;
+    height: 36px;
+    background: #a2b468;
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.05s ease-out;
+    pointer-events: none;
+  }
   
   /* Paneles mecánicos internos del Canvas */
   .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:12px; z-index:10; }
   .overlay-panel.visible { display:flex; }
 
-  /* Modales Flotantes (Instrucciones y Ranking General) */
+  /* Modales Flotantes */
   #instructions-panel, #ranking-panel { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; padding:20px; }
   #instructions-panel.visible, #ranking-panel.visible { display:flex; }
   
   .modal-card { position:relative; background:#f7f4ee; border:3px solid #833988; border-radius:12px; width:100%; max-width:340px; max-height:75dvh; display:flex; flex-direction:column; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
   .modal-inner { width: 100%; overflow-y: auto; padding-right: 4px; margin-bottom: 12px; }
   
-  /* Botón X de cierre elegante */
   .close-x-btn { position:absolute; top:10px; right:12px; background:none; border:none; color:#833988; font-size:1.4em; font-weight:bold; cursor:pointer; padding:4px; line-height:1; font-family:monospace; z-index:10; }
   .close-x-btn:active { color:#5a2060; transform:scale(0.9); }
 
@@ -176,7 +209,7 @@
     <h2>📜 Cómo jugar</h2>
     <div class="modal-inner" id="instructions-inner">
       <p>Jeromín debe destruir todos los sacos de gravilla que pueda ya que su alto contenido en fosfatos es letal para él. Para ello, debe lanzarles cucharas con el botón cucharil de la pantalla o apretando la tecla Enter/Entrar.<br><br>
-      Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha con las flechas de la pantalla o usando las flechas de dirección del teclado.<br><br>
+      Para acumular puntos Jeromín debe comer todos los platos de lentejas que pueda. Para cazarlos, debe moverse de izquierda a derecha usando el joystick táctil en pantalla o mediante las flechas de dirección del teclado.<br><br>
       Mucha suerte y... ¡ayúdale a desatar todo el poder de las legumbres!</p>
     </div>
     <button class="action-btn btn-purple" id="close-instructions-btn">🥄 JUGAR</button>
@@ -198,10 +231,12 @@
 </div>
 
 <div id="controls">
-  <button class="btn" id="btn-shoot" aria-label="'Dispara cucharas!">🥄</button>
-  <div class="dir-group">
-    <button class="btn" id="btn-left" aria-label="Muévete p´allá">◀</button>
-    <button class="btn" id="btn-right" aria-label="Muévete p´acá">▶</button>
+  <button id="btn-shoot" aria-label="'Dispara cucharas!">🥄</button>
+  
+  <div id="joystick-zone">
+    <div id="joystick-base">
+      <div id="joystick-knob"></div>
+    </div>
   </div>
 </div>
 
@@ -307,14 +342,12 @@ function renderRanking() {
     return; 
   }
   
-  // Render de la minilista final del juego (Top 5)
   rankings.slice(0, 5).forEach((e,i) => { 
     const li = document.createElement('li'); 
     li.innerHTML = `<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; 
     rl.appendChild(li); 
   });
 
-  // Render del panel principal completo (Top 10)
   rankings.forEach((e,i) => { 
     const li = document.createElement('li'); 
     li.innerHTML = `<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; 
@@ -376,18 +409,17 @@ saveBtn.addEventListener('click', async () => {
 function cleanControls() {
   btns.left = false; btns.right = false; btns.shoot = false;
   keys['left'] = false; keys['right'] = false; keys['shoot'] = false;
+  resetJoystickVisual();
 }
 
 restartBtn.addEventListener('click', () => { cleanControls(); goPanel.classList.remove('visible'); resetGame(); state = 'waiting'; htmlInstrBtn.classList.add('visible'); htmlRnkBtn.classList.add('visible'); });
 continueBtn.addEventListener('click', () => { cleanControls(); defPanel.classList.remove('visible'); oliver.invincible = 120; state = 'playing'; });
 
-// Lógica de apertura y cierres de Instrucciones
 htmlInstrBtn.addEventListener('click', () => { ensureAudio(); instrPanel.classList.add('visible'); document.getElementById('instructions-inner').scrollTop = 0; });
 const hideInstructions = () => { cleanControls(); instrPanel.classList.remove('visible'); };
 closeInstrBtn.addEventListener('click', hideInstructions);
 closeInstrX.addEventListener('click', hideInstructions);
 
-// Lógica de apertura y cierres de Ranking Principal
 htmlRnkBtn.addEventListener('click', async () => { 
   ensureAudio(); 
   rnkPanel.classList.add('visible'); 
@@ -580,19 +612,82 @@ function drawStartScreen() {
 
 function overlaps(ax,ay,aw,ah,bx,by,bw,bh){return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;}
 
-function setupBtn(id,key){
-  const el=document.getElementById(id);
-  const on=e=>{e.preventDefault();btns[key]=true;ensureAudio();};
-  const off=e=>{e.preventDefault();btns[key]=false;};
-  el.addEventListener('touchstart',on,{passive:false}); 
-  el.addEventListener('touchend',off,{passive:false}); 
-  el.addEventListener('touchcancel',off,{passive:false});
-  el.addEventListener('mousedown',on); 
-  el.addEventListener('mouseup',off); 
-  el.addEventListener('mouseleave',off);
-}
-setupBtn('btn-left','left'); setupBtn('btn-right','right'); setupBtn('btn-shoot','shoot');
+// Configuración Botón Disparar Izquierdo
+const elShoot = document.getElementById('btn-shoot');
+const onShoot = e => { e.preventDefault(); btns['shoot'] = true; ensureAudio(); };
+const offShoot = e => { e.preventDefault(); btns['shoot'] = false; };
+elShoot.addEventListener('touchstart', onShoot, {passive:false});
+elShoot.addEventListener('touchend', offShoot, {passive:false});
+elShoot.addEventListener('touchcancel', offShoot, {passive:false});
+elShoot.addEventListener('mousedown', onShoot);
+elShoot.addEventListener('mouseup', offShoot);
+elShoot.addEventListener('mouseleave', offShoot);
 
+// MOTOR DE JOYSTICK TÁCTIL (Mecánica Analógica)
+const joystickZone = document.getElementById('joystick-zone');
+const joystickKnob = document.getElementById('joystick-knob');
+let joystickActive = false;
+let joystickStartX = 0;
+
+function handleJoystickStart(clientX) {
+  ensureAudio();
+  joystickActive = true;
+  joystickStartX = clientX;
+}
+
+function handleJoystickMove(clientX) {
+  if (!joystickActive) return;
+  const deltaX = clientX - joystickStartX;
+  const maxRange = 30; // Desplazamiento máximo en píxeles del stick interno
+  
+  // Limitar visualmente el movimiento de la bola del stick
+  const clampedX = Math.max(-maxRange, Math.min(maxRange, deltaX));
+  joystickKnob.style.transform = `translateX(${clampedX}px)`;
+  
+  // Margen muerto de tolerancia (Deadzone) para evitar micro-movimientos involuntarios
+  if (clampedX < -8) {
+    btns.left = true;
+    btns.right = false;
+  } else if (clampedX > 8) {
+    btns.right = true;
+    btns.left = false;
+  } else {
+    btns.left = false;
+    btns.right = false;
+  }
+}
+
+function resetJoystickVisual() {
+  joystickActive = false;
+  btns.left = false;
+  btns.right = false;
+  joystickKnob.style.transform = 'translateX(0px)';
+}
+
+// Eventos de Pantalla Táctil (Móviles)
+joystickZone.addEventListener('touchstart', e => {
+  handleJoystickStart(e.touches[0].clientX);
+}, {passive: true});
+
+window.addEventListener('touchmove', e => {
+  if (joystickActive) handleJoystickMove(e.touches[0].clientX);
+}, {passive: true});
+
+window.addEventListener('touchend', resetJoystickVisual);
+window.addEventListener('touchcancel', resetJoystickVisual);
+
+// Eventos de Ratón (Pruebas en PC)
+joystickZone.addEventListener('mousedown', e => {
+  handleJoystickStart(e.clientX);
+});
+
+window.addEventListener('mousemove', e => {
+  if (joystickActive) handleJoystickMove(e.clientX);
+});
+
+window.addEventListener('mouseup', resetJoystickVisual);
+
+// Teclado físico de escritorio
 const keys={};
 document.addEventListener('keydown', e => {
   if(e.key==='ArrowLeft'){keys['left']=true;e.preventDefault();ensureAudio();}

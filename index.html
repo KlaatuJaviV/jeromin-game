@@ -173,7 +173,6 @@ function playWilhelm() {
 
 let rankings = [];
 
-// MODIFICADO: Traer ranking global remoto desde Supabase
 async function loadRankings() {
   try {
     const { data, error } = await supabase
@@ -207,7 +206,6 @@ const livesLeftMsg = document.getElementById('lives-left-msg');
 const continueBtn  = document.getElementById('continue-btn');
 const closeInstrBtn= document.getElementById('close-instructions-btn');
 
-// MODIFICADO: Enviar datos a la base de datos remota
 saveBtn.addEventListener('click', async () => {
   const name = document.getElementById('name-input').value.trim() || 'Anónimo';
   saveBtn.disabled = true;
@@ -240,7 +238,6 @@ function showDefenestration() {
   updateLivesHUD(); defPanel.classList.add('visible');
 }
 
-// MODIFICADO: Asegurar la consulta asíncrona fresca de datos antes de pintar la pantalla de GameOver
 async function showGameOver() {
   scoreFinal.textContent = 'Puntuación: '+score;
   document.getElementById('name-input').value = ''; savedMsg.textContent = '';
@@ -394,7 +391,7 @@ function drawInGameScore() {
   ctx.restore();
 }
 
-function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
+function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x+r,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
 
 function drawStartScreen() {
   drawBg(); drawJeromin(oliver.x,oliver.y,0);
@@ -431,35 +428,48 @@ function setupBtn(id,key){
 }
 setupBtn('btn-left','left'); setupBtn('btn-right','right'); setupBtn('btn-shoot','shoot');
 
+// MODIFICADO: Sistema unificado de eventos de teclado que intercepta ENTER según la pantalla activa
 const keys={};
-document.addEventListener('keydown', async e=>{ // Añadido 'async' para el refresco del ranking
+document.addEventListener('keydown', e => {
   if(e.key==='ArrowLeft'){keys['left']=true;e.preventDefault();ensureAudio();}
   if(e.key==='ArrowRight'){keys['right']=true;e.preventDefault();ensureAudio();}
   
   if(e.key==='Enter'){
-    keys['shoot']=true;
-    e.preventDefault();
     ensureAudio();
-
-    // INTERCEPCIÓN DE ENTER SEGÚN EL ESTADO DEL JUEGO
     
-    // Case 1: Si está en la pantalla de defenestración (perdió una vida), ENTER equivale a "Continuar"
+    // Si estamos en defenestración, ENTER quita el panel y sigue jugando
     if (state === 'defenestration') {
+      e.preventDefault();
       defPanel.classList.remove('visible'); 
       oliver.invincible = 120; 
       state = 'playing';
       return;
     }
     
-    // Case 2: Si está en GameOver pero el botón de guardar está desactivado (porque ya guardó o está guardando), 
-    // ENTER equivale a "¡Jugar de nuevo!"
+    // Si estamos en GameOver y el botón de guardar ya fue pulsado o está deshabilitado, ENTER reinicia la partida
     if (state === 'gameover' && saveBtn.disabled) {
+      e.preventDefault();
       goPanel.classList.remove('visible'); 
       resetGame(); 
       state = 'waiting';
       return;
     }
+
+    // Si estamos en GameOver pero el input tiene el foco, dejamos que el comportamiento nativo actúe (escribir el nombre)
+    if (state === 'gameover' && document.activeElement === document.getElementById('name-input')) {
+      return; 
+    }
+    
+    // En cualquier otro caso normal de juego, ENTER mapea el disparo de cucharas
+    keys['shoot']=true;
+    e.preventDefault();
   }
+});
+
+document.addEventListener('keyup',e=>{
+  if(e.key==='ArrowLeft') keys['left']=false;
+  if(e.key==='ArrowRight') keys['right']=false;
+  if(e.key==='Enter') keys['shoot']=false;
 });
 
 function startGame(){ resetGame(); state='playing'; }
@@ -473,7 +483,17 @@ function gameLoop(){
   const shootTap=shoot&&!shootPrev; shootPrev=shoot;
 
   if(state==='waiting'){drawStartScreen();if(shootTap)startGame();return;}
-  if(state==='defenestration'||state==='gameover') return;
+  
+  // MODIFICADO: Permitir que el bucle dibuje el estado congelado de fondo para que las pantallas capturen las teclas de forma continua
+  if(state==='defenestration' || state==='gameover') {
+    drawBg();
+    enemies.forEach(e=>e.type==='lenteja'?drawLenteja(e.x,e.y):drawSaco(e.x,e.y));
+    spoons.forEach(s=>drawSpoon(s.x,s.y));
+    explosions.forEach(e=>drawExplosion(e));
+    drawJeromin(oliver.x,oliver.y,oliver.invincible);
+    drawInGameScore();
+    return;
+  }
 
   drawBg();
    
@@ -544,7 +564,6 @@ function gameLoop(){
   drawInGameScore();
 }
 
-// NUEVO: Función auto-ejecutable inicial para arrancar el entorno asíncronamente
 (async () => {
   await loadRankings();
   renderRanking(); 

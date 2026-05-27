@@ -263,23 +263,23 @@ jeromínQuietoImg.src   = 'JEROMIN-quieto.png';
 jeromínAndandoImg.src  = 'JEROMIN-andando.png';
 jeromínComiendoImg.src = 'JEROMIN-comiendo.png';
 headImg.src            = 'CABECITA.png';
- 
+
+// CARGA DE AUDIOS DESDE TU REPOSITORIO GITHUB (Misma carpeta que el index)
+const audioLentejitas = new Audio('LENTEJITAS.mp3');
+const audioJolines    = new Audio('JOLINES.mp3');
+
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let actx = null;
-function ensureAudio() { if (!actx) actx = new AudioCtx(); }
+function ensureAudio() { 
+  if (!actx) actx = new AudioCtx(); 
+  if (actx.state === 'suspended') actx.resume();
+}
 
 function playBite() {
-  ensureAudio(); const now = actx.currentTime;
-  const bL = actx.sampleRate*.12, buf = actx.createBuffer(1,bL,actx.sampleRate), d = buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/bL,2);
-  const src = actx.createBufferSource(); src.buffer = buf;
-  const bpf = actx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=1800; bpf.Q.value=0.8;
-  const g = actx.createGain(); g.gain.setValueAtTime(1.2,now); g.gain.exponentialRampToValueAtTime(.001,now+.13);
-  src.connect(bpf); bpf.connect(g); g.connect(actx.destination); src.start(now); src.stop(now+.14);
-  const osc = actx.createOscillator(), g2 = actx.createGain();
-  osc.frequency.setValueAtTime(180,now); osc.frequency.exponentialRampToValueAtTime(60,now+.08);
-  g2.gain.setValueAtTime(.6,now); g2.gain.exponentialRampToValueAtTime(.001,now+.1);
-  osc.connect(g2); g2.connect(actx.destination); osc.start(now); osc.stop(now+.1);
+  ensureAudio();
+  // Reproducción del archivo de audio personalizado de lentejas
+  audioLentejitas.currentTime = 0;
+  audioLentejitas.play().catch(e => console.log("Error de audio:", e));
 }
 
 function playBagExplode() {
@@ -297,21 +297,10 @@ function playBagExplode() {
 }
 
 function playWilhelm() {
-  ensureAudio(); const now = actx.currentTime;
-  const make = (f0,f1,dur,vol) => {
-    const osc=actx.createOscillator(), g=actx.createGain(), vib=actx.createOscillator(), vg=actx.createGain();
-    vib.frequency.value=6; vg.gain.value=f0*.015; vib.connect(vg); vg.connect(osc.frequency);
-    osc.type='sawtooth'; osc.frequency.setValueAtTime(f0,now); osc.frequency.linearRampToValueAtTime(f1,now+dur*.4); osc.frequency.linearRampToValueAtTime(f0*.7,now+dur);
-    g.gain.setValueAtTime(0,now); g.gain.linearRampToValueAtTime(vol,now+.04); g.gain.linearRampToValueAtTime(vol*.8,now+dur*.6); g.gain.exponentialRampToValueAtTime(.001,now+dur);
-    const lpf=actx.createBiquadFilter(); lpf.type='lowpass'; lpf.frequency.value=2400;
-    osc.connect(lpf); lpf.connect(g); g.connect(actx.destination); vib.start(now); osc.start(now); vib.stop(now+dur); osc.stop(now+dur);
-  };
-  make(380,900,.55,.4); make(420,950,.55,.15);
-  const bL=Math.floor(actx.sampleRate*.55), buf=actx.createBuffer(1,bL,actx.sampleRate), d=buf.getChannelData(0);
-  for (let i=0;i<bL;i++) d[i]=(Math.random()*2-1)*.08*Math.sin(Math.PI*i/bL);
-  const ns=actx.createBufferSource(); ns.buffer=buf;
-  const hpf=actx.createBiquadFilter(); hpf.type='highpass'; hpf.frequency.value=1200;
-  ns.connect(hpf); hpf.connect(actx.destination); ns.start(now); ns.stop(now+.55);
+  ensureAudio();
+  // Reproducción del archivo de audio personalizado al ser dañado/muerto
+  audioJolines.currentTime = 0;
+  audioJolines.play().catch(e => console.log("Error de audio:", e));
 }
 
 let rankings = [];

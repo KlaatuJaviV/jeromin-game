@@ -33,40 +33,44 @@
   #btn-shoot { width:96px; height:96px; font-size:1.8em; border-color:#833988; background:rgba(131,57,136,0.12); color:#833988; line-height:1.1; }
   #btn-shoot:active { background:rgba(131,57,136,0.35); }
   
-  /* Paneles superpuestos del Canvas mecánico */
-  .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; z-index:10; }
+  /* Paneles superpuestos del Canvas */
+  .overlay-panel { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(240,237,230,0.97); flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:14px; z-index:10; }
   .overlay-panel.visible { display:flex; }
 
-  /* SOLUCIÓN TOTAL INSTRUCCIONES: Modal flotante independiente del tamaño del juego */
+  /* Modal de Instrucciones */
   #instructions-panel { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center; padding:20px; }
   #instructions-panel.visible { display:flex; }
   #instructions-card { background:#f7f4ee; border:3px solid #833988; border-radius:12px; width:100%; max-width:340px; max-height:80dvh; display:flex; flex-direction:column; padding:20px; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
   #instructions-inner { width: 100%; overflow-y: auto; padding-right: 6px; margin-bottom: 14px; }
   
-  /* Scrollbar estético */
-  #instructions-inner::-webkit-scrollbar { width: 6px; }
-  #instructions-inner::-webkit-scrollbar-track { background: rgba(162,180,104,0.1); border-radius: 4px; }
-  #instructions-inner::-webkit-scrollbar-thumb { background: #a2b468; border-radius: 4px; }
+  /* Scrollbars estéticos */
+  #instructions-inner::-webkit-scrollbar, #ranking::-webkit-scrollbar { width: 5px; }
+  #instructions-inner::-webkit-scrollbar-track, #ranking::-webkit-scrollbar-track { background: rgba(162,180,104,0.05); border-radius: 4px; }
+  #instructions-inner::-webkit-scrollbar-thumb, #ranking::-webkit-scrollbar-thumb { background: #a2b468; border-radius: 4px; }
 
   #instructions-panel h2 { color:#833988; font-size:1.2em; text-align:center; margin-bottom:12px; flex-shrink:0; }
   #instructions-panel p { color:#111; font-size:.85em; line-height:1.6; text-align:center; border:2px solid #a2b468; border-radius:8px; padding:12px; background:rgba(162,180,104,0.06); }
   
   #defenestration-panel h2 { color:#833988; font-size:1.1em; text-align:center; line-height:1.5; }
   #defenestration-panel .lives-left { color:#a2b468; font-size:1em; font-weight:bold; }
-  #gameover-panel h2 { color:#833988; font-size:1.2em; text-align:center; }
-  #gameover-panel .score-final { color:#a2b468; font-size:1.1em; font-weight:bold; }
-  #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:1em; padding:8px 14px; border-radius:4px; text-align:center; width:200px; outline:none; }
+  
+  #gameover-panel h2 { color:#833988; font-size:1.1em; text-align:center; }
+  #gameover-panel .score-final { color:#a2b468; font-size:1em; font-weight:bold; }
+  #name-input { background:#fff; border:2px solid #833988; color:#111; font-family:'Courier New',monospace; font-size:0.9em; padding:6px 12px; border-radius:4px; text-align:center; width:180px; outline:none; }
   #name-input::placeholder { color:#aaa; }
-  #ranking { width:100%; max-width:280px; overflow-y:auto; max-height:130px; }
-  #ranking h3 { color:#833988; font-size:.95em; margin-bottom:6px; text-align:center; border-bottom:2px solid #a2b468; padding-bottom:4px; }
+  
+  /* CORRECCIÓN: Contenedor de Ranking blindado ante desbordamientos */
+  #ranking { width:100%; max-width:260px; overflow-y:auto; max-height:115px; border: 1.5px solid rgba(162,180,104,0.4); border-radius: 6px; padding: 6px 8px; background: rgba(255,255,255,0.3); }
+  #ranking h3 { color:#833988; font-size:.85em; margin-bottom:4px; text-align:center; border-bottom:1.5px solid #a2b468; padding-bottom:2px; position: sticky; top: 0; background: #f7f4ee; }
   #ranking-list { list-style:none; width:100%; }
-  #ranking-list li { display:flex; justify-content:space-between; font-size:.85em; padding:3px 0; border-bottom:1px solid #a2b46844; color:#111; }
+  #ranking-list li { display:flex; justify-content:space-between; font-size:.8em; padding:3px 0; border-bottom:1px solid #a2b46822; color:#111; }
   #ranking-list li:first-child { color:#833988; font-weight:bold; }
-  #ranking-list li .pos { color:#a2b468; width:20px; font-weight:bold; }
-  #ranking-list li .name { flex:1; padding-left:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #ranking-list li .pos { color:#a2b468; width:18px; font-weight:bold; }
+  #ranking-list li .name { flex:1; padding-left:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align: left; }
   #ranking-list li .pts { color:#833988; font-weight:bold; }
-  #saved-msg { color:#a2b468; font-size:.85em; min-height:1em; font-weight:bold; }
-  .action-btn { font-family:'Courier New',monospace; font-size:1em; cursor:pointer; padding:10px 24px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.03em; flex-shrink:0; text-align:center; }
+  
+  #saved-msg { color:#a2b468; font-size:.8em; min-height:1.1em; font-weight:bold; }
+  .action-btn { font-family:'Courier New',monospace; font-size:0.95em; cursor:pointer; padding:8px 20px; border-radius:6px; border:none; font-weight:bold; letter-spacing:.02em; flex-shrink:0; text-align:center; }
   .btn-purple { background:#833988; color:#fff; }
   .btn-purple:active { background:#5a2060; }
   .btn-green { background:#a2b468; color:#fff; }
@@ -209,7 +213,7 @@ async function loadRankings() {
       .from('rankings')
       .select('name, score')
       .order('score', { ascending: false })
-      .limit(8);
+      .limit(10); // Cargamos un pequeño cojín extra
 
     if (error) throw error;
     rankings = data || [];
@@ -221,8 +225,16 @@ async function loadRankings() {
 
 function renderRanking() {
   const rl = document.getElementById('ranking-list'); rl.innerHTML = '';
-  if (!rankings.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468">Sin puntuaciones aún</span></li>'; return; }
-  rankings.forEach((e,i) => { const li=document.createElement('li'); li.innerHTML=`<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; rl.appendChild(li); });
+  if (!rankings.length) { rl.innerHTML = '<li><span class="name" style="color:#a2b468; text-align:center;">Sin marcas aún</span></li>'; return; }
+  
+  // CORRECCIÓN VISUAL: Solo pintamos un máximo de 5 filas en pantalla para no reventar la interfaz del panel
+  const visualTop = rankings.slice(0, 5);
+  
+  visualTop.forEach((e,i) => { 
+    const li = document.createElement('li'); 
+    li.innerHTML = `<span class="pos">${i+1}.</span><span class="name">${e.name}</span><span class="pts">${e.score}</span>`; 
+    rl.appendChild(li); 
+  });
 }
 
 const goPanel      = document.getElementById('gameover-panel');
@@ -243,7 +255,6 @@ saveBtn.addEventListener('click', async () => {
   savedMsg.textContent = '⏳ Guardando marca global...';
 
   try {
-    // 1. Insertamos el nuevo récord
     const { error: insertError } = await supabase
       .from('rankings')
       .insert([{ name, score }]);
@@ -253,7 +264,6 @@ saveBtn.addEventListener('click', async () => {
     savedMsg.textContent = '✅ ¡Guardado!';
     saveBtn.style.opacity = '.5';
 
-    // OPTIMIZACIÓN EN CALIENTE: Limpieza automática para que el ranking no crezca sin límite
     const { data: allScores } = await supabase
       .from('rankings')
       .select('id')
